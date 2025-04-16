@@ -1,9 +1,7 @@
 package lexer
 
 import (
-	"compilers/stdLexer"
 	"compilers/utils"
-	"crypto/aes"
 	"os"
 	"strings"
 )
@@ -18,7 +16,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 		return nil, utils.GetEmptyFileErr(filename)
 	}
 
-	var ret []stdLexer.Token[MantisTokenKind]
+	var ret []MantisToken
 	column, line := 0, 1
 	isComment, islabel := false, false
 	runes := []rune(string(bytes))
@@ -35,14 +33,14 @@ func Tokenize(filename string) ([]MantisToken, error) {
 		if buffer.Len() > 0 {
 			var tk MantisToken
 			pos := utils.Pos{Line: int64(line), Column: int64(column - buffer.Len())}
-			tk = NewToken(pos, MantisToken_ID, 1, []rune(buffer.String())...)
+			tk = NewToken(pos, ID, 1, []rune(buffer.String())...)
 			if !isComment {
-				tk, err = models.ResolveTokenId(filename, tk)
+				tk, err = ResolveTokenId(filename, tk)
 				if err != nil {
 					return nil, err
 				}
 			}
-			stdLexer.AppendToken(&ret, tk)
+			AppendToken(&ret, tk)
 			if islabel {
 				islabel = false
 			}
@@ -54,47 +52,42 @@ func Tokenize(filename string) ([]MantisToken, error) {
 			column = 0
 			isComment = false
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_BREAK_LINE, 1, run)
-			stdLexer.AppendToken[MantisTokenKind](&ret, tk)
+			tk := NewToken(pos, BREAK_LINE, 1, run)
+			AppendToken(&ret, tk)
 			break
 		case '\t':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_TAB, 1, run)
-			stdLexer.AppendToken(&ret, tk)
+			tk := NewToken(pos, TAB, 1, run)
+			AppendToken(&ret, tk)
 			break
 		case ' ':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_SPACE, 1, run)
-			// s := []stdLexer.Token[*MantisToken](ret)
-			stdLexer.AppendToken[MantisTokenKind](&ret, tk)
+			tk := NewToken(pos, SPACE, 1, run)
+			// s := []Token[*MantisToken](ret)
+			AppendToken(&ret, tk)
 			break
 		case ',':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_COMMA, 1, run)
-			stdLexer.AppendToken(&ret, tk)
+			tk := NewToken(pos, COMMA, 1, run)
+			AppendToken(&ret, tk)
 			break
 		case ':':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_COLON, 1, run)
-			stdLexer.AppendToken(&ret, tk)
+			tk := NewToken(pos, COLON, 1, run)
+			AppendToken(&ret, tk)
 			break
-		case '#':
-			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_HASHTAG, 1, run)
-			stdLexer.AppendToken(&ret, tk)
-			islabel = true
-			break
+	
 		case '/':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, MantisToken_SLASH, 1, run)
+			tk := NewToken(pos, SLASH, 1, run)
 			if runes[i+1] == '/' {
 				isComment = true
 				i += 1
 				column++
-				stdLexer.AppendToken(&ret, tk)
+				AppendToken(&ret, tk)
 				break
 			}
-			stdLexer.AppendToken(&ret, tk)
+			AppendToken(&ret, tk)
 			break
 		default:
 			if isComment {
@@ -106,7 +99,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 	}
 
 	pos := utils.Pos{Line: int64(line), Column: int64(column)}
-	tk := NewToken(pos, MantisToken_EOF, 1, '0')
-	stdLexer.AppendToken(&ret, tk)
+	tk := NewToken(pos, EOF, 1, '0')
+	AppendToken(&ret, tk)
 	return ret, nil
 }
