@@ -30,36 +30,44 @@ func ResolveTokenId(filename string, token MantisToken) (MantisToken, error) {
 		return token, nil
 	}
 	value := string(token.Value)
-	
+
 	if tk := FindKeyword(value); tk != UNKNOW {
 		return NewToken(token.Pos, tk, 1, token.Value...), nil
 	}
-	
+
 	if _, err := strconv.ParseInt(value, 0, 64); err == nil {
 		return NewToken(token.Pos, NUMBER, 1, token.Value...), nil
 	}
-	
+
 	return token, nil
 }
 
 func FindKeyword(word string) MantisTokenKind {
 	switch {
-		case word == "fun":
-			return KEY_FUN
-		case word == "for":
-			return KEY_FOR
-		case word == "if":
-			return KEY_IF
-		case word == "else":
-			return KEY_ELSE
-		case word == "var":
-			return KEY_VAR
-		default:
-		 	return UNKNOW
+	case word == "fun":
+		return KEY_FUN
+	case word == "for":
+		return KEY_FOR
+	case word == "if":
+		return KEY_IF
+	case word == "else":
+		return KEY_ELSE
+	case word == "var":
+		return KEY_VAR
+	case word == "null":
+		return NIL
+	case word == "nil":
+		return NIL
+	case word == "true":
+		return TRUE
+	case word == "false":
+		return FALSE
+	default:
+		return UNKNOW
 	}
 }
 
-func (this* MantisToken) String() string {
+func (this *MantisToken) String() string {
 	s := this.Kind.String()
 	v := string(this.Value)
 	if this.Kind == BREAK_LINE {

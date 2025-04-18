@@ -2,6 +2,7 @@ package parser
 
 import (
 	"compilers/langs/Mantis/lexer"
+	"compilers/stdLexer"
 	"compilers/stdParser"
 	"compilers/utils"
 	"errors"
@@ -9,6 +10,7 @@ import (
 
 type (
 	MantisParser struct {
+		Subset int
 		stdParser.Parser[lexer.MantisTokenKind]
 	}
 
@@ -20,11 +22,19 @@ type (
 )
 
 func NewMantisParser(filename, output string, subset int) (*MantisParser, error) {
-	p, err := stdParser.NewParser[lexer.MantisTokenKind](filename, output, subset)
-	return any(p).(*MantisParser), err
+
+	tokens, err := lexer.Tokenize(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := stdParser.NewParser[lexer.MantisTokenKind](filename, output, any(tokens).([]stdLexer.Token[lexer.MantisTokenKind]))
+	ret := any(p).(*MantisParser)
+	ret.Subset = subset
+	return ret, err
 }
 
-func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser.Ast, err error) {
+func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser.Scope, err error) {
 
 	tk := parser.Get(0)
 	for tk != nil && tk.Kind != lexer.EOF {

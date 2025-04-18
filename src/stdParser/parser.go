@@ -6,26 +6,25 @@ import (
 )
 
 type Parser[T comparable] struct {
-	Filename  string
-	Tokens    []stdLexer.Token[T]
-	Scopes    map[uint64]*Scope
-	Variables map[string]*Variable
-	Output    Ast
-	Cursor    int
+	Filename   string
+	OutputFile string
+	Tokens     []stdLexer.Token[T]
+	Scopes     map[uint64]*Scope
+	Variables  map[string]*Variable
+	Output     Ast
+	Cursor     int
 }
 
-func NewParser[T comparable](filename, output string, subset int) (*Parser[T], error) {
-
-	// tokens, err := lexer.Tokenize(filename)
-	// if err != nil {
-	// return nil, err
-	// }
+func NewParser[T comparable](filename, output string, tokens []stdLexer.Token[T]) (*Parser[T], error) {
 
 	return &Parser[T]{
-		Filename: filename,
-		Output:   Ast{},
-		Cursor:   0,
-		// Tokens: tokens,
+		Filename:   filename,
+		OutputFile: output,
+		Tokens:     tokens,
+		Scopes:     map[uint64]*Scope{},
+		Variables:  map[string]*Variable{},
+		Output:     Ast{},
+		Cursor:     0,
 	}, nil
 }
 

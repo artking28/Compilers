@@ -8,7 +8,7 @@ import (
 
 type FuncStmt struct {
 	Name string
-	Body stdParser.Ast
+	Body stdParser.Scope
 	MantisStmtBase
 }
 
@@ -21,7 +21,7 @@ func (this FuncStmt) GetTitle() string {
 	return this.Title
 }
 
-func NewFuncStmt(name string, body stdParser.Ast, pos utils.Pos, parser *MantisParser) *FuncStmt {
+func NewFuncStmt(name string, body stdParser.Scope, pos utils.Pos, parser *MantisParser) *FuncStmt {
 	return &FuncStmt{
 		Name: name,
 		Body: body,
