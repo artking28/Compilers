@@ -1,6 +1,9 @@
 package stdParser
 
-import "compilers/stdLexer"
+import (
+	"compilers/stdLexer"
+	"errors"
+)
 
 type Parser[T comparable] struct {
 	Filename  string
@@ -12,16 +15,16 @@ type Parser[T comparable] struct {
 }
 
 func NewParser[T comparable](filename, output string, subset int) (*Parser[T], error) {
-	
+
 	// tokens, err := lexer.Tokenize(filename)
-    // if err != nil {
-    	// return nil, err
-    // }
-	
+	// if err != nil {
+	// return nil, err
+	// }
+
 	return &Parser[T]{
 		Filename: filename,
-		Output: Ast{},
-		Cursor: 0,
+		Output:   Ast{},
+		Cursor:   0,
 		// Tokens: tokens,
 	}, nil
 }
@@ -50,39 +53,43 @@ const (
 	MandatorySpaceMode
 )
 
-func (this *Parser[T]) HasNextConsume(spaceMode int, spaceCode T, kinds ...T) *stdLexer.Token[T] {
+func (this *Parser[T]) HasNextConsume(spaceMode int, fillOf T, kinds ...T) (*stdLexer.Token[T], error) {
 	if spaceMode < NoSpaceMode || spaceMode > MandatorySpaceMode {
 		panic("invalid argument in function 'HasNextConsume'")
 	}
-	for findSpace := false; ; {
+	for hasSpace := false; ; {
 		token := this.Get(0)
 		if token == nil {
 			// Fim dos tokens sem encontrar um tipo esperado
-			return nil
+			return nil, errors.New("no token has been found")
 		}
 
 		for _, kind := range kinds {
 			if token.Kind == kind {
 				// Se espaços eram obrigatórios mas não foram encontrados, falha
-				if spaceMode == MandatorySpaceMode && !findSpace {
-					return nil
+				if spaceMode == MandatorySpaceMode && !hasSpace {
+					return nil, errors.New("rule expects spaces but none has been found")
 				}
 				this.Consume(1)
-				return token
+				return token, nil
 			}
 		}
 
-		if token.Kind == spaceCode {
-			findSpace = true
+		if token.Kind == fillOf {
+			// Se espaços não eram permitidos
+			if spaceMode == NoSpaceMode {
+				return nil, errors.New("space(s) has been found when it actually isn't allowed here")
+			}
+			hasSpace = true
 			this.Consume(1)
 			continue
 		}
 
-		// Se espaços não eram permitidos ou eram obrigatórios e encontrou outro token, falha
-		if spaceMode == NoSpaceMode || spaceMode == MandatorySpaceMode {
-			return nil
+		// Se espaços eram obrigatórios e encontrou outro token, falha
+		if spaceMode == MandatorySpaceMode {
+			return nil, errors.New("rule expects spaces but none has been found")
 		}
 
-		return nil // Qualquer outro caso não esperado falha
+		return nil, errors.New("unknown error") // Qualquer outro caso não esperado falha
 	}
 }

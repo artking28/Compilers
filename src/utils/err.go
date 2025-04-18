@@ -25,21 +25,25 @@ const (
 	DivideByZeroErrCode
 	InvalidArgumentErrCode
 	UnexpectedTokenErrCode
+	UnexpectedForLoopStatementInRootErrCode
+	UnexpectedIfStatementInRootErrCode
 	ExpectedTokenErrCode
 	InvalidMinmonicErrCode
 	UnkownLabelErrCode
 	UnkownFailureErrCode
 
-	NilPointerExceptionErrLabel ErrLabel = "error.nil.pointer"
-	FileNotFoundErrLabel        ErrLabel = "error.file.not.found"
-	EmptyFileErrLabel           ErrLabel = "error.empty.file"
-	DivideByZeroErrLabel        ErrLabel = "error.divide.by.zero"
-	InvalidArgumentErrLabel     ErrLabel = "error.invalid.argument"
-	UnexpectedTokenErrLabel     ErrLabel = "error.unexpected.token"
-	ExpectedTokenErrLabel       ErrLabel = "error.expected.token"
-	InvalidMinmonicErrLabel     ErrLabel = "error.invalid.minmonic"
-	UnkownLabelErrLabel         ErrLabel = "error.unkown.label"
-	UnkownFailureErrLabel       ErrLabel = "error.unkown.failure"
+	NilPointerExceptionErrLabel              ErrLabel = "error.nil.pointer"
+	FileNotFoundErrLabel                     ErrLabel = "error.file.not.found"
+	EmptyFileErrLabel                        ErrLabel = "error.empty.file"
+	DivideByZeroErrLabel                     ErrLabel = "error.divide.by.zero"
+	InvalidArgumentErrLabel                  ErrLabel = "error.invalid.argument"
+	UnexpectedTokenErrLabel                  ErrLabel = "error.unexpected.token"
+	UnexpectedForLoopStatementInRootErrLabel ErrLabel = "error.unexpected.for.in.root"
+	UnexpectedIfStatementInRootErrLabel      ErrLabel = "error.unexpected.if.in.root"
+	ExpectedTokenErrLabel                    ErrLabel = "error.expected.token"
+	InvalidMinmonicErrLabel                  ErrLabel = "error.invalid.minmonic"
+	UnkownLabelErrLabel                      ErrLabel = "error.unkown.label"
+	UnkownFailureErrLabel                    ErrLabel = "error.unkown.failure"
 )
 
 func GetNilPointerExceptionErr() Err {
@@ -90,6 +94,22 @@ func GetUnexpectedTokenNoPosErr(filename string, word string) Err {
 	}
 }
 
+func GetUnexpectedForLoopStatementInRoot(filename string, pos Pos) Err {
+	return Err{
+		Code:  UnexpectedForLoopStatementInRootErrCode,
+		Label: UnexpectedForLoopStatementInRootErrLabel,
+		Msg:   fmt.Sprintf("Unexpected for token in the root in the file '%s' at line %d, column %d.", filename, pos.Line, pos.Column),
+	}
+}
+
+func GetUnexpectedIfStatementInRoot(filename string, pos Pos) Err {
+	return Err{
+		Code:  UnexpectedIfStatementInRootErrCode,
+		Label: UnexpectedIfStatementInRootErrLabel,
+		Msg:   fmt.Sprintf("Unexpected if token in the root in the file '%s' at line %d, column %d.", filename, pos.Line, pos.Column),
+	}
+}
+
 func GetUnexpectedTokenErr(filename string, word string, pos Pos) Err {
 	return Err{
 		Code:  UnexpectedTokenErrCode,
@@ -110,7 +130,15 @@ func GetExpectedTokenErr(filename string, phrase string, pos Pos) Err {
 	return Err{
 		Code:  UnexpectedTokenErrCode,
 		Label: UnexpectedTokenErrLabel,
-		Msg:   fmt.Sprintf("Missing %s in the file '%s' at line %d, column %d.", phrase, filename, pos.Line, pos.Column),
+		Msg:   fmt.Sprintf("Missing %s in the file '%s' at line %d, column %d", phrase, filename, pos.Line, pos.Column),
+	}
+}
+
+func GetExpectedTokenErrOr(filename string, phrase, add string, pos Pos) Err {
+	return Err{
+		Code:  UnexpectedTokenErrCode,
+		Label: UnexpectedTokenErrLabel,
+		Msg:   fmt.Sprintf("Missing %s in the file '%s' at line %d, column %d, or %s", phrase, filename, pos.Line, pos.Column, add),
 	}
 }
 

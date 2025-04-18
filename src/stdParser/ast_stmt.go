@@ -7,9 +7,10 @@ type (
 		WriteMemASM() ([]uint16, error)
 		GetTitle() string
 	}
-	
+
 	StmtBase struct {
-		Title  string  `json:"title"`
-		Pos    utils.Pos     `json:"pos"`
+		Parser *Parser[any] `json:"-"`
+		Title  string       `json:"title"`
+		Pos    utils.Pos    `json:"pos"`
 	}
 )

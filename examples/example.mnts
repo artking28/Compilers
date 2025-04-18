@@ -1,0 +1,32 @@
+
+
+fun main() {
+
+    // One var, one value
+    foo := 6
+
+    foo += 1 + 1 - 1 * 1
+
+    // Two vars, same value for both
+    bar, baz := 5
+
+    // Two vars, one value and 0 value
+    thud, corge := 8, _
+
+    // Two vars, two values
+    alpha, romeo := 4, 1
+
+    // Put somthing on RES
+    print()
+
+    // Finish the program
+    exit()
+
+    for i:=0; i<10; i++ {
+        // Do something
+    }
+
+    if foo < 10 {
+        // Do another thing
+    }
+}
