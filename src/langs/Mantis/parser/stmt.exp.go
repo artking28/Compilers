@@ -6,6 +6,14 @@ import (
 	"compilers/utils"
 )
 
+var ExpTokens = []lexer.MantisTokenKind{
+	lexer.ID,
+	lexer.NUMBER,
+	lexer.NIL,
+	lexer.TRUE,
+	lexer.FALSE,
+}
+
 type (
 	MantisExp[T any] struct {
 		stdParser.Exp[T]
@@ -17,6 +25,16 @@ type (
 		MantisStmtBase
 	}
 )
+
+func (this MantisVExp[T]) Resolve() (T, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (this MantisExp[T]) Resolve() (T, error) {
+	//TODO implement me
+	panic("implement me | MantisExp@WriteMemASM")
+}
 
 func (this MantisVExp[T]) WriteMemASM() ([]uint16, error) {
 	//TODO implement me
@@ -88,6 +106,9 @@ func (parser *MantisParser) ParseExpression(endAt lexer.MantisTokenKind) error {
 	return nil
 }
 
-func ParseExpressionReturn[T comparable](endAt lexer.MantisTokenKind) (*stdParser.Exp[T], error) {
+func ParseExpressionReturn(endAt ...lexer.MantisTokenKind) (*stdParser.Exp[any], error) {
+	if len(endAt) <= 0 {
+		panic("invalid argument in function 'ParseExpressionReturn', endAt is null or empty")
+	}
 	return nil, nil
 }

@@ -27,6 +27,7 @@ const (
 	UnexpectedTokenErrCode
 	UnexpectedForLoopStatementInRootErrCode
 	UnexpectedIfStatementInRootErrCode
+	TooManyValuesErrCode
 	ExpectedTokenErrCode
 	InvalidMinmonicErrCode
 	UnkownLabelErrCode
@@ -40,6 +41,7 @@ const (
 	UnexpectedTokenErrLabel                  ErrLabel = "error.unexpected.token"
 	UnexpectedForLoopStatementInRootErrLabel ErrLabel = "error.unexpected.for.in.root"
 	UnexpectedIfStatementInRootErrLabel      ErrLabel = "error.unexpected.if.in.root"
+	TooManyValuesErrLabel                    ErrLabel = "error.too.many.values"
 	ExpectedTokenErrLabel                    ErrLabel = "error.expected.token"
 	InvalidMinmonicErrLabel                  ErrLabel = "error.invalid.minmonic"
 	UnkownLabelErrLabel                      ErrLabel = "error.unkown.label"
@@ -139,6 +141,14 @@ func GetExpectedTokenErrOr(filename string, phrase, add string, pos Pos) Err {
 		Code:  UnexpectedTokenErrCode,
 		Label: UnexpectedTokenErrLabel,
 		Msg:   fmt.Sprintf("Missing %s in the file '%s' at line %d, column %d, or %s", phrase, filename, pos.Line, pos.Column, add),
+	}
+}
+
+func GetTooManyValuesErr(filename string, line int64) Err {
+	return Err{
+		Code:  TooManyValuesErrCode,
+		Label: TooManyValuesErrLabel,
+		Msg:   fmt.Sprintf("Too many values associated in the file '%s' at line %d", filename, line),
 	}
 }
 

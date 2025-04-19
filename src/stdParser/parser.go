@@ -2,6 +2,7 @@ package stdParser
 
 import (
 	"compilers/stdLexer"
+	"compilers/utils"
 	"errors"
 )
 
@@ -10,7 +11,7 @@ type Parser[T comparable] struct {
 	OutputFile string
 	Tokens     []stdLexer.Token[T]
 	Scopes     map[uint64]*Scope
-	Variables  map[string]*Variable
+	Variables  map[string]*Variable[T]
 	Output     Ast
 	Cursor     int
 }
@@ -22,7 +23,7 @@ func NewParser[T comparable](filename, output string, tokens []stdLexer.Token[T]
 		OutputFile: output,
 		Tokens:     tokens,
 		Scopes:     map[uint64]*Scope{},
-		Variables:  map[string]*Variable{},
+		Variables:  map[string]*Variable[T]{},
 		Output:     Ast{},
 		Cursor:     0,
 	}, nil
@@ -30,6 +31,10 @@ func NewParser[T comparable](filename, output string, tokens []stdLexer.Token[T]
 
 func (this *Parser[T]) Inject(stmts ...Stmt) {
 	this.Output.Statements = append(this.Output.Statements, stmts...)
+}
+
+func (this *Parser[T]) At() utils.Pos {
+	return this.Tokens[this.Cursor].Pos
 }
 
 func (this *Parser[T]) Get(n int) *stdLexer.Token[T] {
@@ -46,6 +51,18 @@ func (this *Parser[T]) Consume(n int) {
 	this.Cursor += n
 }
 
+func (this *Parser[T]) GetFirstAfter(afterOf T) (T, error) {
+	token := this.Get(0)
+	for i := 1; token != nil; i++ {
+		if token.Kind == afterOf {
+			token = this.Get(i)
+			continue
+		}
+		return token.Kind, nil
+	}
+	return *new(T), errors.New("no token has been found")
+}
+
 const (
 	NoSpaceMode = iota
 	OptionalSpaceMode
@@ -54,7 +71,10 @@ const (
 
 func (this *Parser[T]) HasNextConsume(spaceMode int, fillOf T, kinds ...T) (*stdLexer.Token[T], error) {
 	if spaceMode < NoSpaceMode || spaceMode > MandatorySpaceMode {
-		panic("invalid argument in function 'HasNextConsume'")
+		panic("invalid argument in function 'HasNextConsume', unknown space mode")
+	}
+	if len(kinds) <= 0 {
+		panic("invalid argument in function 'HasNextConsume', kinds is null or empty")
 	}
 	for hasSpace := false; ; {
 		token := this.Get(0)

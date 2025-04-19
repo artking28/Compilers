@@ -5,10 +5,10 @@ type (
 		Statements []Stmt `json:"statements"`
 	}
 
-	Variable struct {
+	Variable[T any] struct {
 		Id    uint64
 		Name  string
-		Value IExp[any]
+		Value IExp[T]
 		Owner uint64
 	}
 
@@ -17,3 +17,7 @@ type (
 		Body []Ast
 	}
 )
+
+func NewVariable[T any](id uint64, name string, value IExp[T], owner uint64) *Variable[T] {
+	return &Variable[T]{Id: id, Name: name, Value: value, Owner: owner}
+}

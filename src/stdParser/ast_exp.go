@@ -17,6 +17,11 @@ type (
 	Operator int
 )
 
+func (e Exp[T]) Resolve() (T, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 const (
 	Sum Operator = iota
 	Sub

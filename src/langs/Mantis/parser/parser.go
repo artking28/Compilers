@@ -12,6 +12,7 @@ type (
 	MantisParser struct {
 		Subset int
 		stdParser.Parser[lexer.MantisTokenKind]
+		Variables map[string]*MantisVariable
 	}
 
 	MantisStmtBase struct {
@@ -36,6 +37,7 @@ func NewMantisParser(filename, output string, subset int) (*MantisParser, error)
 
 func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser.Scope, err error) {
 
+	scopeId := uint64(len(parser.Scopes) + 1)
 	tk := parser.Get(0)
 	for tk != nil && tk.Kind != lexer.EOF {
 
@@ -54,7 +56,7 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 		// Parses a global variable
 		case lexer.KEY_VAR:
-			err = errors.Join(err, parser.ParseVariable())
+			err = errors.Join(err, parser.ParseSingleVarDef(scopeId))
 			break
 
 		// Parses a variable definition, assigment or function call
@@ -63,7 +65,42 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				return ret, utils.GetUnexpectedTokenNoPosErr(parser.Filename, string(tk.Value))
 			}
 
-			break
+			kind, err := parser.GetFirstAfter(lexer.SPACE)
+			if err != nil {
+				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
+				break
+			}
+
+			// Parses single var definition
+			if kind == lexer.COLON {
+				err = errors.Join(err, parser.ParseSingleVarDef(scopeId))
+				break
+
+				// Parses multi var definition
+			} else if kind == lexer.COMMA {
+				err = errors.Join(err, parser.ParseMultiVarDef(scopeId))
+				break
+
+				// Parses assignment
+			} else if kind == lexer.EQUAL {
+				err = errors.Join(err, parser.ParseAssign(scopeId))
+				break
+
+				// Parses augmented assignment
+			} else if kind == lexer.ADD || kind == lexer.SUB || kind == lexer.MUL {
+				err = errors.Join(err, parser.ParseArgAssign(scopeId))
+				break
+
+				// Parses function call
+			} else if kind == lexer.L_PAREN {
+				err = errors.Join(err, parser.ParseFuncCall(scopeId))
+				break
+
+				// Error
+			} else {
+				err = errors.Join(err, utils.GetExpectedTokenErr(parser.Filename, "some token to create a variable definition, assigment or function call", tk.Pos))
+				break
+			}
 
 		// Parses an if statement
 		case lexer.KEY_IF:
