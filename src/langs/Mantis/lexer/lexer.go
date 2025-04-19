@@ -60,6 +60,56 @@ func Tokenize(filename string) ([]MantisToken, error) {
 			tk := NewToken(pos, TAB, 1, run)
 			AppendToken(&ret, tk)
 			break
+		case '(':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, L_PAREN, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case ')':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, R_PAREN, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '{':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, L_BRACE, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '}':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, R_BRACE, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '=':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, EQUAL, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '+':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, ADD, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '-':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, SUB, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '*':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, MUL, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '<':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, LESS_THEN, 1, run)
+			AppendToken(&ret, tk)
+			break
+		case '>':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, GREATER_THEN, 1, run)
+			AppendToken(&ret, tk)
+			break
 		case ' ':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, SPACE, 1, run)
@@ -76,7 +126,11 @@ func Tokenize(filename string) ([]MantisToken, error) {
 			tk := NewToken(pos, COLON, 1, run)
 			AppendToken(&ret, tk)
 			break
-	
+		case ';':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, SEMICOLON, 1, run)
+			AppendToken(&ret, tk)
+			break
 		case '/':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, SLASH, 1, run)
@@ -94,7 +148,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 				buffer.WriteRune(run)
 				continue
 			}
-			return nil, utils.GetUnexpectedTokenErr(filename, string(run), utils.Pos{Line: int64(line), Column: int64(column)})
+			return nil, utils.GetUnexpectedTokenErr(filename, string(run), utils.Pos{Line: int64(line) - 1, Column: int64(column)})
 		}
 	}
 

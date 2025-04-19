@@ -5,19 +5,19 @@ type (
 		Statements []Stmt `json:"statements"`
 	}
 
-	Variable[T any] struct {
+	Variable struct {
 		Id    uint64
 		Name  string
-		Value IExp[T]
+		Value IExp
 		Owner uint64
 	}
 
 	Scope struct {
 		Id   uint64
-		Body []Ast
+		Body Ast
 	}
 )
 
-func NewVariable[T any](id uint64, name string, value IExp[T], owner uint64) *Variable[T] {
-	return &Variable[T]{Id: id, Name: name, Value: value, Owner: owner}
+func NewVariable(id uint64, name string, value IExp, owner uint64) *Variable {
+	return &Variable{Id: id, Name: name, Value: value, Owner: owner}
 }

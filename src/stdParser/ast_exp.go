@@ -1,23 +1,23 @@
 package stdParser
 
 type (
-	IExp[T any] interface {
-		Resolve() (T, error)
+	IExp interface {
+		Resolve() (int, error)
 	}
 
-	Exp[T any] struct {
-		All  []T
+	Exp struct {
+		All  []int
 		Oper Operator
 	}
 
-	VExp[T any] struct {
-		Value T
+	VExp struct {
+		Value int
 	}
 
 	Operator int
 )
 
-func (e Exp[T]) Resolve() (T, error) {
+func (e Exp) Resolve() (int, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -32,10 +32,10 @@ const (
 	XorBit
 )
 
-func NewVExp[T any](value T) *VExp[T] {
-	return &VExp[T]{Value: value}
+func NewVExp(value int) *VExp {
+	return &VExp{Value: value}
 }
 
-func NewExp[T any](all []T, oper Operator) *Exp[T] {
-	return &Exp[T]{All: all, Oper: oper}
+func NewExp(all []int, oper Operator) *Exp {
+	return &Exp{All: all, Oper: oper}
 }

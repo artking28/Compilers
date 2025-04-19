@@ -11,8 +11,7 @@ type Parser[T comparable] struct {
 	OutputFile string
 	Tokens     []stdLexer.Token[T]
 	Scopes     map[uint64]*Scope
-	Variables  map[string]*Variable[T]
-	Output     Ast
+	Variables  map[string]*Variable
 	Cursor     int
 }
 
@@ -23,15 +22,14 @@ func NewParser[T comparable](filename, output string, tokens []stdLexer.Token[T]
 		OutputFile: output,
 		Tokens:     tokens,
 		Scopes:     map[uint64]*Scope{},
-		Variables:  map[string]*Variable[T]{},
-		Output:     Ast{},
+		Variables:  map[string]*Variable{},
 		Cursor:     0,
 	}, nil
 }
 
-func (this *Parser[T]) Inject(stmts ...Stmt) {
-	this.Output.Statements = append(this.Output.Statements, stmts...)
-}
+//func (this *Parser[T]) Inject(stmts ...Stmt) {
+//	this.Output.Statements = append(this.Output.Statements, stmts...)
+//}
 
 func (this *Parser[T]) At() utils.Pos {
 	return this.Tokens[this.Cursor].Pos
@@ -45,7 +43,7 @@ func (this *Parser[T]) Get(n int) *stdLexer.Token[T] {
 }
 
 func (this *Parser[T]) Consume(n int) {
-	if this.Cursor >= len(this.Tokens) {
+	if this.Cursor+n >= len(this.Tokens) {
 		return
 	}
 	this.Cursor += n

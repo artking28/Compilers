@@ -15,47 +15,47 @@ var ExpTokens = []lexer.MantisTokenKind{
 }
 
 type (
-	MantisExp[T any] struct {
-		stdParser.Exp[T]
+	MantisExp struct {
+		stdParser.Exp
 		MantisStmtBase
 	}
 
-	MantisVExp[T any] struct {
-		stdParser.VExp[T]
+	MantisVExp struct {
+		stdParser.VExp
 		MantisStmtBase
 	}
 )
 
-func (this MantisVExp[T]) Resolve() (T, error) {
+func (this *MantisVExp) Resolve() (int, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (this MantisExp[T]) Resolve() (T, error) {
+func (this *MantisExp) Resolve() (int, error) {
 	//TODO implement me
 	panic("implement me | MantisExp@WriteMemASM")
 }
 
-func (this MantisVExp[T]) WriteMemASM() ([]uint16, error) {
+func (this MantisVExp) WriteMemASM() ([]uint16, error) {
 	//TODO implement me
 	panic("implement me | MantisVExp@WriteMemASM")
 }
 
-func (this MantisVExp[T]) GetTitle() string {
+func (this MantisVExp) GetTitle() string {
 	return this.Title
 }
 
-func (this MantisExp[T]) WriteMemASM() ([]uint16, error) {
+func (this MantisExp) WriteMemASM() ([]uint16, error) {
 	//TODO implement me
 	panic("implement me | MantisExp@WriteMemASM")
 }
 
-func (this MantisExp[T]) GetTitle() string {
+func (this MantisExp) GetTitle() string {
 	return this.Title
 }
 
-func NewMantisVExp[T any](value T, pos utils.Pos, parser *MantisParser) *MantisVExp[T] {
-	return &MantisVExp[T]{
+func NewMantisVExp(value int, pos utils.Pos, parser *MantisParser) *MantisVExp {
+	return &MantisVExp{
 		VExp: *stdParser.NewVExp(value),
 		MantisStmtBase: MantisStmtBase{
 			Parser: parser,
@@ -65,8 +65,8 @@ func NewMantisVExp[T any](value T, pos utils.Pos, parser *MantisParser) *MantisV
 	}
 }
 
-func NewMantisExp[T any](exp stdParser.Exp[T], pos utils.Pos, parser *MantisParser) *MantisExp[T] {
-	return &MantisExp[T]{
+func NewMantisExp(exp stdParser.Exp, pos utils.Pos, parser *MantisParser) *MantisExp {
+	return &MantisExp{
 		Exp: exp,
 		MantisStmtBase: MantisStmtBase{
 			Parser: parser,
@@ -76,39 +76,41 @@ func NewMantisExp[T any](exp stdParser.Exp[T], pos utils.Pos, parser *MantisPars
 	}
 }
 
-func (parser *MantisParser) ParseExpression(endAt lexer.MantisTokenKind) error {
+func (parser *MantisParser) ParseExpression(endAt lexer.MantisTokenKind) (stdParser.IExp, error) {
 	h0 := parser.Get(0)
 	h1 := parser.Get(1)
 	if h0 == nil || h1 == nil {
-		return utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
 	if h1.Kind == endAt {
-		parser.Inject(NewMantisVExp(h1.Value, h1.Pos, parser))
+		return NewMantisVExp(int(h1.Value[0]), h1.Pos, parser), nil
 	}
 
-	var e stdParser.Exp[any]
+	var e stdParser.Exp
 	if h0.Kind == lexer.ID || h0.Kind == lexer.NUMBER || h0.Kind == lexer.NIL {
-		exp, err := ParseExpressionReturn[int](endAt)
+		exp, err := ParseExpressionReturn(endAt)
 		if err == nil {
-			return utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 		}
-		e = any(exp).(stdParser.Exp[any])
+		e = any(exp).(stdParser.Exp)
 	} else if h0.Kind == lexer.TRUE || h0.Kind == lexer.FALSE {
-		exp, err := ParseExpressionReturn[bool](endAt)
+		exp, err := ParseExpressionReturn(endAt)
 		if err == nil {
-			return utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 		}
-		e = any(exp).(stdParser.Exp[any])
+		e = any(exp).(stdParser.Exp)
 	} else {
-		return utils.GetExpectedTokenErr(parser.Filename, "valid expression like id, numbers, booleans or nil", h0.Pos)
+		return nil, utils.GetExpectedTokenErr(parser.Filename, "valid expression like id, numbers, booleans or nil", h0.Pos)
 	}
-	parser.Inject(NewMantisExp(e, h0.Pos, parser))
-	return nil
+	return NewMantisExp(e, h0.Pos, parser), nil
 }
 
-func ParseExpressionReturn(endAt ...lexer.MantisTokenKind) (*stdParser.Exp[any], error) {
+func ParseExpressionReturn(endAt ...lexer.MantisTokenKind) (stdParser.IExp, error) {
 	if len(endAt) <= 0 {
 		panic("invalid argument in function 'ParseExpressionReturn', endAt is null or empty")
 	}
-	return nil, nil
+	return &MantisVExp{
+		VExp:           stdParser.VExp{Value: 0},
+		MantisStmtBase: MantisStmtBase{},
+	}, nil
 }

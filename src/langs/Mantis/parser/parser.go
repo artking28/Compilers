@@ -13,6 +13,7 @@ type (
 		Subset int
 		stdParser.Parser[lexer.MantisTokenKind]
 		Variables map[string]*MantisVariable
+		Tokens    []lexer.MantisToken
 	}
 
 	MantisStmtBase struct {
@@ -29,8 +30,31 @@ func NewMantisParser(filename, output string, subset int) (*MantisParser, error)
 		return nil, err
 	}
 
-	p, err := stdParser.NewParser[lexer.MantisTokenKind](filename, output, any(tokens).([]stdLexer.Token[lexer.MantisTokenKind]))
-	ret := any(p).(*MantisParser)
+	//ret := MantisParser{
+	//	Subset:    subset,
+	//	Tokens:    tokens,
+	//	Variables: nil,
+	//	Parser: stdParser.Parser[lexer.MantisTokenKind]{
+	//		Filename:   filename,
+	//		OutputFile: output,
+	//		Scopes:     map[uint64]*stdParser.Scope{},
+	//		Output:     stdParser.Ast{},
+	//		Cursor:     0,
+	//	},
+	//}
+	//return &ret, err
+
+	var ts []stdLexer.Token[lexer.MantisTokenKind]
+	for _, t := range tokens {
+		ts = append(ts, stdLexer.Token[lexer.MantisTokenKind](t))
+	}
+	p, err := stdParser.NewParser[lexer.MantisTokenKind](filename, output, ts)
+	if err != nil {
+		return nil, err
+	}
+	ret := &MantisParser{}
+	ret.Variables = map[string]*MantisVariable{}
+	ret.Parser = *p
 	ret.Subset = subset
 	return ret, err
 }
@@ -46,17 +70,23 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 		// Parses a comment section
 		case lexer.SLASH:
-			err = errors.Join(err, parser.ParseComment())
+			c, e := parser.ParseComment()
+			err = errors.Join(e)
+			ret.Body.Statements = append(ret.Body.Statements, c)
 			break
 
 		// Parses a function
 		case lexer.KEY_FUN:
-			err = errors.Join(err, parser.ParseFunction())
+			f, e := parser.ParseFunction()
+			err = errors.Join(e)
+			ret.Body.Statements = append(ret.Body.Statements, f)
 			break
 
 		// Parses a global variable
 		case lexer.KEY_VAR:
-			err = errors.Join(err, parser.ParseSingleVarDef(scopeId))
+			vd, e := parser.ParseSingleVarDef(scopeId)
+			err = errors.Join(e)
+			ret.Body.Statements = append(ret.Body.Statements, vd)
 			break
 
 		// Parses a variable definition, assigment or function call
@@ -64,21 +94,28 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 			if scopeType == utils.RootScope {
 				return ret, utils.GetUnexpectedTokenNoPosErr(parser.Filename, string(tk.Value))
 			}
-
-			kind, err := parser.GetFirstAfter(lexer.SPACE)
-			if err != nil {
+			parser.Consume(1)
+			kind, e0 := parser.GetFirstAfter(lexer.SPACE)
+			if e0 != nil {
 				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
 				break
 			}
 
+			parser.Consume(-1)
 			// Parses single var definition
 			if kind == lexer.COLON {
-				err = errors.Join(err, parser.ParseSingleVarDef(scopeId))
+				svd, e := parser.ParseSingleVarDef(scopeId)
+				err = errors.Join(e)
+				ret.Body.Statements = append(ret.Body.Statements, svd)
 				break
 
 				// Parses multi var definition
 			} else if kind == lexer.COMMA {
-				err = errors.Join(err, parser.ParseMultiVarDef(scopeId))
+				mvd, e := parser.ParseMultiVarDef(scopeId)
+				err = errors.Join(e)
+				for _, svd := range *mvd {
+					ret.Body.Statements = append(ret.Body.Statements, svd)
+				}
 				break
 
 				// Parses assignment
@@ -93,12 +130,14 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 				// Parses function call
 			} else if kind == lexer.L_PAREN {
-				err = errors.Join(err, parser.ParseFuncCall(scopeId))
+				fc, e := parser.ParseFuncCall(scopeId)
+				err = errors.Join(e)
+				ret.Body.Statements = append(ret.Body.Statements, fc)
 				break
 
 				// Error
 			} else {
-				err = errors.Join(err, utils.GetExpectedTokenErr(parser.Filename, "some token to create a variable definition, assigment or function call", tk.Pos))
+				err = errors.Join(err, utils.GetExpectedTokenErr(parser.Filename, "some token to create a variable definition, an assigment or function call", tk.Pos))
 				break
 			}
 

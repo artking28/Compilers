@@ -31,6 +31,10 @@ func ResolveTokenId(filename string, token MantisToken) (MantisToken, error) {
 	}
 	value := string(token.Value)
 
+	if value == "_" {
+		return NewToken(token.Pos, UNDERLINE, 1, token.Value...), nil
+	}
+
 	if tk := FindKeyword(value); tk != UNKNOW {
 		return NewToken(token.Pos, tk, 1, token.Value...), nil
 	}

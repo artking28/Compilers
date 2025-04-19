@@ -22,11 +22,11 @@ fun main() {
     // Finish the program
     exit()
 
-    for i:=0; i<10; i++ {
+    // for i:=0; i<10; i++ {
         // Do something
-    }
+    // }
 
-    if foo < 10 {
+    // if foo < 10 {
         // Do another thing
-    }
+    // }
 }

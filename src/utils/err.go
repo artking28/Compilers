@@ -100,7 +100,7 @@ func GetUnexpectedForLoopStatementInRoot(filename string, pos Pos) Err {
 	return Err{
 		Code:  UnexpectedForLoopStatementInRootErrCode,
 		Label: UnexpectedForLoopStatementInRootErrLabel,
-		Msg:   fmt.Sprintf("Unexpected for token in the root in the file '%s' at line %d, column %d.", filename, pos.Line, pos.Column),
+		Msg:   fmt.Sprintf("Unexpected for token in the root. File '%s' at line %d, column %d.", filename, pos.Line, pos.Column),
 	}
 }
 
@@ -108,7 +108,7 @@ func GetUnexpectedIfStatementInRoot(filename string, pos Pos) Err {
 	return Err{
 		Code:  UnexpectedIfStatementInRootErrCode,
 		Label: UnexpectedIfStatementInRootErrLabel,
-		Msg:   fmt.Sprintf("Unexpected if token in the root in the file '%s' at line %d, column %d.", filename, pos.Line, pos.Column),
+		Msg:   fmt.Sprintf("Unexpected if token in the root. File '%s' at line %d, column %d.", filename, pos.Line, pos.Column),
 	}
 }
 

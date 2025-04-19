@@ -32,21 +32,21 @@ func NewFuncCall(name string, from uint64, pos utils.Pos, parser *MantisParser) 
 		}}
 }
 
-func (parser *MantisParser) ParseFuncCall(from uint64) (err error) {
+func (parser *MantisParser) ParseFuncCall(from uint64) (ret *FuncCall, err error) {
 	h0 := parser.Get(0)
 	if h0 == nil {
-		return utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
-	nameTk, _ := parser.HasNextConsume(stdParser.MandatorySpaceMode, lexer.ID)
+	parser.Consume(-1)
+	nameTk, err := parser.HasNextConsume(stdParser.MandatorySpaceMode, lexer.SPACE, lexer.ID)
 	if nameTk == nil {
-		return utils.GetExpectedTokenErr(parser.Filename, "function name", h0.Pos)
+		return nil, utils.GetExpectedTokenErr(parser.Filename, "function name", h0.Pos)
 	}
-	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.L_PAREN); err != nil {
-		return utils.GetExpectedTokenErrOr(parser.Filename, "left parenthesis", err.Error(), h0.Pos)
+	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.SPACE, lexer.L_PAREN); err != nil {
+		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "left parenthesis", err.Error(), h0.Pos)
 	}
-	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.R_PAREN); err != nil {
-		return utils.GetExpectedTokenErrOr(parser.Filename, "right parenthesis", err.Error(), h0.Pos)
+	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.SPACE, lexer.R_PAREN); err != nil {
+		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "right parenthesis", err.Error(), h0.Pos)
 	}
-	parser.Inject(NewFuncCall(string(nameTk.Value), from, h0.Pos, parser))
-	return nil
+	return NewFuncCall(string(nameTk.Value), from, h0.Pos, parser), nil
 }
