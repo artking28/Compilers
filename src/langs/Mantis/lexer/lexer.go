@@ -82,7 +82,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 			break
 		case '=':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, EQUAL, 1, run)
+			tk := NewToken(pos, ASSIGN, 1, run)
 			AppendToken(&ret, tk)
 			break
 		case '+':
@@ -102,7 +102,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 			break
 		case '<':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
-			tk := NewToken(pos, LESS_THEN, 1, run)
+			tk := NewToken(pos, LOWER_THEN, 1, run)
 			AppendToken(&ret, tk)
 			break
 		case '>':

@@ -37,12 +37,19 @@ const (
 	R_PAREN
 	L_BRACE
 	R_BRACE
+	INIT
 	EQUAL
-	LESS_THEN
+	LOWER_THEN
+	LOWER_EQUAL_THEN
+	SHIFT_LEFT
 	GREATER_THEN
+	GREATER_EQUAL_THEN
+	SHIFT_RIGHT
+	ASSIGN
 	ADD
+	ASSIGN_ADD
 	SUB
-	MUL
+	ASSIGN_SUB
 	KEY_FUN
 	KEY_FOR
 	KEY_IF
@@ -53,6 +60,8 @@ const (
 	KEY_WHEN
 	KEY_REPEAT
 	KEY_IN
+	MUL
+	ASSIGN_MUL
 )
 
 func (this *MantisTokenKind) String() (s string) {
@@ -89,8 +98,8 @@ func (this *MantisTokenKind) String() (s string) {
 		s = "R_BRACE"
 	case EQUAL:
 		s = "EQUAL"
-	case LESS_THEN:
-		s = "LESS_THEN"
+	case LOWER_THEN:
+		s = "LOWER_THEN"
 	case GREATER_THEN:
 		s = "GREATER_THEN"
 	case ADD:
@@ -121,4 +130,29 @@ func (this *MantisTokenKind) String() (s string) {
 		s = fmt.Sprintf("UNKNOWN(%d)", *this)
 	}
 	return s
+}
+
+func CombineTokens(tk0, tk1 MantisTokenKind) MantisTokenKind {
+
+	if tk0 == COLON && tk1 == ASSIGN {
+		return INIT
+	} else if tk0 == ADD && tk1 == ASSIGN {
+		return ASSIGN_ADD
+	} else if tk0 == SUB && tk1 == ASSIGN {
+		return ASSIGN_SUB
+	} else if tk0 == MUL && tk1 == ASSIGN {
+		return ASSIGN_MUL
+	} else if tk0 == ASSIGN && tk1 == ASSIGN {
+		return EQUAL
+	} else if tk0 == GREATER_THEN && tk1 == ASSIGN {
+		return GREATER_EQUAL_THEN
+	} else if tk0 == LOWER_THEN && tk1 == ASSIGN {
+		return LOWER_EQUAL_THEN
+	} else if tk0 == GREATER_THEN && tk1 == GREATER_THEN {
+		return SHIFT_RIGHT
+	} else if tk0 == LOWER_THEN && tk1 == LOWER_THEN {
+		return SHIFT_LEFT
+	} else {
+		return UNKNOW
+	}
 }

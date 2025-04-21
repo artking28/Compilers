@@ -49,16 +49,16 @@ func (this *Parser[T]) Consume(n int) {
 	this.Cursor += n
 }
 
-func (this *Parser[T]) GetFirstAfter(afterOf T) (T, error) {
+func (this *Parser[T]) GetFirstAfter(afterOf T) (*stdLexer.Token[T], error) {
 	token := this.Get(0)
 	for i := 1; token != nil; i++ {
 		if token.Kind == afterOf {
 			token = this.Get(i)
 			continue
 		}
-		return token.Kind, nil
+		return token, nil
 	}
-	return *new(T), errors.New("no token has been found")
+	return nil, errors.New("no token has been found")
 }
 
 const (

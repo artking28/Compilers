@@ -57,7 +57,7 @@ func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariab
 	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, ExpTokens...); err != nil {
 		return nil, utils.GetExpectedTokenErr(parser.Filename, "expression value", parser.At())
 	}
-	value, err := ParseExpressionReturn(lexer.BREAK_LINE, lexer.SEMICOLON)
+	value, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON)
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +74,11 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 		parser.Consume(1)
 		waitColon = false
 	}
-	kind, err := parser.GetFirstAfter(lexer.SPACE)
-	if kind != lexer.ID || err != nil {
+	t, err := parser.GetFirstAfter(lexer.SPACE)
+	if t == nil {
+		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+	}
+	if t.Kind != lexer.ID || err != nil {
 		return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
 	}
 
@@ -121,11 +124,11 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 		}
 
 		first = true
-		nextKind, err := parser.GetFirstAfter(lexer.SPACE)
+		t, err := parser.GetFirstAfter(lexer.SPACE)
 		if err != nil {
 			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 		}
-		if nextKind != lexer.COMMA {
+		if t.Kind != lexer.COMMA {
 			value, err := ParseExpressionReturn(lexer.BREAK_LINE, lexer.SEMICOLON, lexer.COMMA)
 			if err != nil {
 				return nil, err

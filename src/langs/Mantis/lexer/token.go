@@ -18,9 +18,16 @@ func AppendToken(tokens *[]MantisToken, token MantisToken) {
 		tokens = &[]MantisToken{}
 	}
 	count := len(*tokens)
-	if count > 0 && (*tokens)[count-1].Kind == token.Kind && string((*tokens)[count-1].Value) == string(token.Value) {
-		(*tokens)[count-1].Repeat = (*tokens)[count-1].Repeat + 1
-		return
+	if count > 0 {
+		last := (*tokens)[count-1]
+		if last.Kind == token.Kind && string(last.Value) == string(token.Value) {
+			(*tokens)[count-1].Repeat = last.Repeat + 1
+			return
+		}
+		if c := CombineTokens(last.Kind, token.Kind); c != UNKNOW {
+			last.Kind = c
+			return
+		}
 	}
 	*tokens = append(*tokens, token)
 }

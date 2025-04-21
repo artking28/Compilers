@@ -95,7 +95,7 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				return ret, utils.GetUnexpectedTokenNoPosErr(parser.Filename, string(tk.Value))
 			}
 			parser.Consume(1)
-			kind, e0 := parser.GetFirstAfter(lexer.SPACE)
+			t, e0 := parser.GetFirstAfter(lexer.SPACE)
 			if e0 != nil {
 				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
 				break
@@ -103,14 +103,14 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 			parser.Consume(-1)
 			// Parses single var definition
-			if kind == lexer.COLON {
+			if t.Kind == lexer.COLON {
 				svd, e := parser.ParseSingleVarDef(scopeId)
 				err = errors.Join(e)
 				ret.Body.Statements = append(ret.Body.Statements, svd)
 				break
 
 				// Parses multi var definition
-			} else if kind == lexer.COMMA {
+			} else if t.Kind == lexer.COMMA {
 				mvd, e := parser.ParseMultiVarDef(scopeId)
 				err = errors.Join(e)
 				for _, svd := range *mvd {
@@ -119,17 +119,17 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				break
 
 				// Parses assignment
-			} else if kind == lexer.EQUAL {
+			} else if t.Kind == lexer.EQUAL {
 				err = errors.Join(err, parser.ParseAssign(scopeId))
 				break
 
 				// Parses augmented assignment
-			} else if kind == lexer.ADD || kind == lexer.SUB || kind == lexer.MUL {
+			} else if t.Kind == lexer.ADD || t.Kind == lexer.SUB || t.Kind == lexer.MUL {
 				err = errors.Join(err, parser.ParseArgAssign(scopeId))
 				break
 
 				// Parses function call
-			} else if kind == lexer.L_PAREN {
+			} else if t.Kind == lexer.L_PAREN {
 				fc, e := parser.ParseFuncCall(scopeId)
 				err = errors.Join(e)
 				ret.Body.Statements = append(ret.Body.Statements, fc)

@@ -76,41 +76,50 @@ func NewMantisExp(exp stdParser.Exp, pos utils.Pos, parser *MantisParser) *Manti
 	}
 }
 
-func (parser *MantisParser) ParseExpression(endAt lexer.MantisTokenKind) (stdParser.IExp, error) {
+func (parser *MantisParser) ParseExpression(endAt ...lexer.MantisTokenKind) (stdParser.IExp, error) {
 	h0 := parser.Get(0)
-	h1 := parser.Get(1)
-	if h0 == nil || h1 == nil {
+	if h0 == nil {
 		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
-	if h1.Kind == endAt {
-		return NewMantisVExp(int(h1.Value[0]), h1.Pos, parser), nil
+
+	var expList []stdParser.IExp
+	var lastSig = lexer.UNKNOW
+	lastWasSig := false
+
+	for i:=0; h0 != nil; i++ {
+		if h0.Kind == lexer.ADD || h0.Kind == lexer.SUB {
+			for {
+				i++
+				hs, e := parser.GetFirstAfter(lexer.SPACE)
+				if e != nil {
+					return nil, e
+				}
+				if hs.Kind == lexer.ADD || hs.Kind == lexer.SUB {
+
+				} else {
+					lastSig = h0.Kind
+					break
+				}
+			}
+		}
+
+		h0 = parser.Get(i)
 	}
 
-	var e stdParser.Exp
-	if h0.Kind == lexer.ID || h0.Kind == lexer.NUMBER || h0.Kind == lexer.NIL {
-		exp, err := ParseExpressionReturn(endAt)
-		if err == nil {
-			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
-		}
-		e = any(exp).(stdParser.Exp)
-	} else if h0.Kind == lexer.TRUE || h0.Kind == lexer.FALSE {
-		exp, err := ParseExpressionReturn(endAt)
-		if err == nil {
-			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
-		}
-		e = any(exp).(stdParser.Exp)
-	} else {
-		return nil, utils.GetExpectedTokenErr(parser.Filename, "valid expression like id, numbers, booleans or nil", h0.Pos)
-	}
-	return NewMantisExp(e, h0.Pos, parser), nil
+	return new Exp(expList, lastSig)
 }
 
-func ParseExpressionReturn(endAt ...lexer.MantisTokenKind) (stdParser.IExp, error) {
-	if len(endAt) <= 0 {
-		panic("invalid argument in function 'ParseExpressionReturn', endAt is null or empty")
-	}
-	return &MantisVExp{
-		VExp:           stdParser.VExp{Value: 0},
-		MantisStmtBase: MantisStmtBase{},
-	}, nil
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
