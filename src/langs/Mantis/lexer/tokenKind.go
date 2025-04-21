@@ -12,6 +12,11 @@ const (
 	SUBSET_MAX = SUBSET_1
 )
 
+var Subsets = map[int]bool{
+	SUBSET_0: true,
+	SUBSET_1: true,
+}
+
 const (
 	EOF MantisTokenKind = (iota+1)*100 + SUBSET_0
 	UNKNOW

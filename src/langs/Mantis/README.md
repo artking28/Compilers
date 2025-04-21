@@ -26,4 +26,4 @@ Verifica a validade do arquivo Mantis.
 ## Flags
 
 - `-s <subset>`, `--subset=<subset>` **[opcional]** - Define o subset a ser usado para compilar o código.
-- `-o <file>` **[opcional]** - Define o nome e tipo do output gerado.
+- `-o <file>` **[opcional]** - Define o nome e tipo do output gerado para build.

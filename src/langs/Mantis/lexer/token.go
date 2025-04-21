@@ -39,8 +39,8 @@ func ResolveTokenId(filename string, token MantisToken) (MantisToken, error) {
 		return NewToken(token.Pos, tk, 1, token.Value...), nil
 	}
 
-	if _, err := strconv.ParseInt(value, 0, 64); err == nil {
-		return NewToken(token.Pos, NUMBER, 1, token.Value...), nil
+	if n, err := strconv.ParseInt(value, 0, 64); err == nil {
+		return NewToken(token.Pos, NUMBER, 1, []rune{rune(n)}...), nil
 	}
 
 	return token, nil

@@ -61,6 +61,7 @@ func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariab
 	if err != nil {
 		return nil, err
 	}
+
 	return NewVariableStmt(string(nameTk.Value), parser.At(), value, scopeId, parser), nil
 }
 
