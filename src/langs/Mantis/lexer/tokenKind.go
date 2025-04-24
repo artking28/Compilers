@@ -1,6 +1,8 @@
 package lexer
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type (
 	MantisTokenKind int
@@ -33,6 +35,7 @@ const (
 	COLON
 	SEMICOLON
 	SLASH
+	COMMENT_LINE
 	L_PAREN
 	R_PAREN
 	L_BRACE
@@ -46,10 +49,18 @@ const (
 	GREATER_EQUAL_THEN
 	SHIFT_RIGHT
 	ASSIGN
+	MOD
+	ASSIGN_MOD
 	ADD
 	ASSIGN_ADD
 	SUB
 	ASSIGN_SUB
+	AND_BIT
+	AND_BOOL
+	XOR_BIT
+	XOR_BOOL
+	OR_BIT
+	OR_BOOL
 	KEY_FUN
 	KEY_FOR
 	KEY_IF
@@ -67,91 +78,143 @@ const (
 func (this *MantisTokenKind) String() (s string) {
 	switch *this {
 	case EOF:
-		s = "EOF"
+		return "EOF"
 	case BREAK_LINE:
-		s = "BREAK_LINE"
+		return "BREAK_LINE"
 	case TAB:
-		s = "TAB"
+		return "TAB"
 	case SPACE:
-		s = "SPACE"
+		return "SPACE"
 	case ID:
-		s = "ID"
+		return "ID"
+	case NIL:
+		return "NIL"
+	case TRUE:
+		return "TRUE"
+	case FALSE:
+		return "FALSE"
 	case NUMBER:
-		s = "NUMBER"
+		return "NUMBER"
 	case UNDERLINE:
-		s = "UNDERLINE"
+		return "UNDERLINE"
 	case COMMA:
-		s = "COMMA"
+		return "COMMA"
 	case COLON:
-		s = "COLON"
+		return "COLON"
 	case SEMICOLON:
-		s = "SEMICOLON"
+		return "SEMICOLON"
 	case SLASH:
-		s = "SLASH"
+		return "SLASH"
+	case COMMENT_LINE:
+		return "COMMENT_LINE"
 	case L_PAREN:
-		s = "L_PAREN"
+		return "L_PAREN"
 	case R_PAREN:
-		s = "R_PAREN"
+		return "R_PAREN"
 	case L_BRACE:
-		s = "L_BRACE"
+		return "L_BRACE"
 	case R_BRACE:
-		s = "R_BRACE"
+		return "R_BRACE"
+	case INIT:
+		return "INIT"
 	case EQUAL:
-		s = "EQUAL"
+		return "EQUAL"
 	case LOWER_THEN:
-		s = "LOWER_THEN"
+		return "LOWER_THEN"
+	case LOWER_EQUAL_THEN:
+		return "LOWER_EQUAL_THEN"
+	case SHIFT_LEFT:
+		return "SHIFT_LEFT"
 	case GREATER_THEN:
-		s = "GREATER_THEN"
+		return "GREATER_THEN"
+	case GREATER_EQUAL_THEN:
+		return "GREATER_EQUAL_THEN"
+	case SHIFT_RIGHT:
+		return "SHIFT_RIGHT"
+	case ASSIGN:
+		return "ASSIGN"
+	case MOD:
+		return "MOD"
+	case ASSIGN_MOD:
+		return "ASSIGN_MOD"
 	case ADD:
-		s = "ADD"
+		return "ADD"
+	case ASSIGN_ADD:
+		return "ASSIGN_ADD"
 	case SUB:
-		s = "SUB"
-	case MUL:
-		s = "MUL"
+		return "SUB"
+	case ASSIGN_SUB:
+		return "ASSIGN_SUB"
+	case AND_BIT:
+		return "AND_BIT"
+	case AND_BOOL:
+		return "AND_BOOL"
+	case XOR_BIT:
+		return "XOR_BIT"
+	case XOR_BOOL:
+		return "XOR_BOOL"
+	case OR_BIT:
+		return "OR_BIT"
+	case OR_BOOL:
+		return "OR_BOOL"
 	case KEY_FUN:
-		s = "KEY_FUN"
+		return "KEY_FUN"
 	case KEY_FOR:
-		s = "KEY_FOR"
+		return "KEY_FOR"
 	case KEY_IF:
-		s = "KEY_IF"
+		return "KEY_IF"
 	case KEY_ELSE:
-		s = "KEY_ELSE"
+		return "KEY_ELSE"
+	case KEY_VAR:
+		return "KEY_VAR"
 	case KEY_RETURN:
-		s = "KEY_RETURN"
+		return "KEY_RETURN"
 	case KEY_MATCH:
-		s = "KEY_MATCH"
+		return "KEY_MATCH"
 	case KEY_WHEN:
-		s = "KEY_WHEN"
+		return "KEY_WHEN"
 	case KEY_REPEAT:
-		s = "KEY_REPEAT"
+		return "KEY_REPEAT"
 	case KEY_IN:
-		s = "KEY_IN"
+		return "KEY_IN"
+	case MUL:
+		return "MUL"
+	case ASSIGN_MUL:
+		return "ASSIGN_MUL"
 	default:
 		s = fmt.Sprintf("UNKNOWN(%d)", *this)
 	}
 	return s
 }
 
-func CombineTokens(tk0, tk1 MantisTokenKind) MantisTokenKind {
+func CombineTokens(tk0, tk1 MantisToken) MantisTokenKind {
 
-	if tk0 == COLON && tk1 == ASSIGN {
+	if tk0.Kind == COLON && tk1.Kind == ASSIGN {
 		return INIT
-	} else if tk0 == ADD && tk1 == ASSIGN {
+	} else if tk0.Kind == ADD && tk1.Kind == ASSIGN {
 		return ASSIGN_ADD
-	} else if tk0 == SUB && tk1 == ASSIGN {
+	} else if tk0.Kind == SUB && tk1.Kind == ASSIGN {
 		return ASSIGN_SUB
-	} else if tk0 == MUL && tk1 == ASSIGN {
+	} else if tk0.Kind == MOD && tk1.Kind == ASSIGN {
+		return ASSIGN_MOD
+	} else if tk0.Kind == MUL && tk1.Kind == ASSIGN {
 		return ASSIGN_MUL
-	} else if tk0 == ASSIGN && tk1 == ASSIGN {
+	} else if tk0.Kind == ASSIGN && tk1.Kind == ASSIGN {
 		return EQUAL
-	} else if tk0 == GREATER_THEN && tk1 == ASSIGN {
+	} else if tk0.Kind == GREATER_THEN && tk1.Kind == ASSIGN {
 		return GREATER_EQUAL_THEN
-	} else if tk0 == LOWER_THEN && tk1 == ASSIGN {
+	} else if tk0.Kind == LOWER_THEN && tk1.Kind == ASSIGN {
 		return LOWER_EQUAL_THEN
-	} else if tk0 == GREATER_THEN && tk1 == GREATER_THEN {
+	} else if tk0.Kind == GREATER_THEN && tk1.Kind == GREATER_THEN {
 		return SHIFT_RIGHT
-	} else if tk0 == LOWER_THEN && tk1 == LOWER_THEN {
-		return SHIFT_LEFT
+	} else if tk0.Kind == AND_BIT && tk1.Kind == AND_BIT {
+		return AND_BOOL
+	} else if tk0.Kind == OR_BIT && tk1.Kind == OR_BIT {
+		return OR_BOOL
+	} else if tk0.Kind == XOR_BIT && tk1.Kind == XOR_BIT {
+		return XOR_BOOL
+	} else if tk0.Kind == SLASH && tk1.Kind == SLASH {
+		return COMMENT_LINE
 	} else {
 		return UNKNOW
 	}

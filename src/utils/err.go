@@ -23,29 +23,29 @@ const (
 	FileNotFoundErrCode
 	EmptyFileErrCode
 	DivideByZeroErrCode
+	InvalidTokenPerSubsetErrCode
 	InvalidArgumentErrCode
 	UnexpectedTokenErrCode
 	UnexpectedForLoopStatementInRootErrCode
 	UnexpectedIfStatementInRootErrCode
 	TooManyValuesErrCode
-	ExpectedTokenErrCode
-	InvalidMinmonicErrCode
-	UnkownLabelErrCode
-	UnkownFailureErrCode
+	ConsecutiveOperatorsErrCode
+	ConsecutiveValuesErrCode
+	MismatchedTypesErrCode
 
 	NilPointerExceptionErrLabel              ErrLabel = "error.nil.pointer"
 	FileNotFoundErrLabel                     ErrLabel = "error.file.not.found"
 	EmptyFileErrLabel                        ErrLabel = "error.empty.file"
 	DivideByZeroErrLabel                     ErrLabel = "error.divide.by.zero"
+	InvalidTokenPerSubsetErrLabel            ErrLabel = "error.invalid.token.per.subset"
 	InvalidArgumentErrLabel                  ErrLabel = "error.invalid.argument"
 	UnexpectedTokenErrLabel                  ErrLabel = "error.unexpected.token"
 	UnexpectedForLoopStatementInRootErrLabel ErrLabel = "error.unexpected.for.in.root"
 	UnexpectedIfStatementInRootErrLabel      ErrLabel = "error.unexpected.if.in.root"
 	TooManyValuesErrLabel                    ErrLabel = "error.too.many.values"
-	ExpectedTokenErrLabel                    ErrLabel = "error.expected.token"
-	InvalidMinmonicErrLabel                  ErrLabel = "error.invalid.minmonic"
-	UnkownLabelErrLabel                      ErrLabel = "error.unkown.label"
-	UnkownFailureErrLabel                    ErrLabel = "error.unkown.failure"
+	ConsecutiveOperatorsErrLabel             ErrLabel = "error.consecutive.operators"
+	ConsecutiveValuesErrLabel                ErrLabel = "error.consecutive.values"
+	MismatchedTypesErrLabel                  ErrLabel = "error.mismatch.type.values"
 )
 
 func GetNilPointerExceptionErr() Err {
@@ -112,6 +112,14 @@ func GetUnexpectedIfStatementInRoot(filename string, pos Pos) Err {
 	}
 }
 
+func GetInvalidTokenPerSubset(filename string, word string, pos Pos) Err {
+	return Err{
+		Code:  InvalidTokenPerSubsetErrCode,
+		Label: InvalidTokenPerSubsetErrLabel,
+		Msg:   fmt.Sprintf("The specified set do not allows the token '%s', take it off from '%s' at line %d, column %d.", word, filename, pos.Line, pos.Column),
+	}
+}
+
 func GetUnexpectedTokenErr(filename string, word string, pos Pos) Err {
 	return Err{
 		Code:  UnexpectedTokenErrCode,
@@ -152,18 +160,26 @@ func GetTooManyValuesErr(filename string, line int64) Err {
 	}
 }
 
-func GetUnkownLabelErr(filename string, label string) Err {
+func GetConsecutiveOperatorsErr(filename string, pos Pos) Err {
 	return Err{
-		Code:  UnkownLabelErrCode,
-		Label: UnkownLabelErrLabel,
-		Msg:   fmt.Sprintf("Jump to label '%s' failed: label not found in in file '%s'.", label, filename),
+		Code:  ConsecutiveOperatorsErrCode,
+		Label: ConsecutiveOperatorsErrLabel,
+		Msg:   fmt.Sprintf("Found consecutive operators in the file '%s' at line %d", filename, pos.Line),
 	}
 }
 
-func GetUnkownErr() Err {
+func GetConsecutiveValuesErr(filename string, pos Pos) Err {
 	return Err{
-		Code:  UnkownFailureErrCode,
-		Label: UnkownFailureErrLabel,
-		Msg:   "",
+		Code:  ConsecutiveValuesErrCode,
+		Label: ConsecutiveValuesErrLabel,
+		Msg:   fmt.Sprintf("Found consecutive values in the file '%s' at line %d", filename, pos.Line),
+	}
+}
+
+func GetMismatchedTypesErr(filename string, expected, found string, pos Pos) Err {
+	return Err{
+		Code:  MismatchedTypesErrCode,
+		Label: MismatchedTypesErrLabel,
+		Msg:   fmt.Sprintf("Mismatched types: expected %s but found %s in file '%s' at line %d, column %d", expected, found, filename, pos.Line, pos.Column),
 	}
 }

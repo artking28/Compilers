@@ -25,7 +25,7 @@ type (
 
 func NewMantisParser(filename, output string, subset int) (*MantisParser, error) {
 
-	tokens, err := lexer.Tokenize(filename)
+	tokens, err := lexer.Tokenize(filename, subset)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 		switch tk.Kind {
 
 		// Parses a comment section
-		case lexer.SLASH:
+		case lexer.COMMENT_LINE:
 			c, e := parser.ParseComment()
 			err = errors.Join(e)
 			ret.Body.Statements = append(ret.Body.Statements, c)
@@ -103,7 +103,7 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 			parser.Consume(-1)
 			// Parses single var definition
-			if t.Kind == lexer.COLON {
+			if t.Kind == lexer.INIT {
 				svd, e := parser.ParseSingleVarDef(scopeId)
 				err = errors.Join(e)
 				ret.Body.Statements = append(ret.Body.Statements, svd)
@@ -124,7 +124,7 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				break
 
 				// Parses augmented assignment
-			} else if t.Kind == lexer.ADD || t.Kind == lexer.SUB || t.Kind == lexer.MUL {
+			} else if t.Kind == lexer.ASSIGN_ADD || t.Kind == lexer.ASSIGN_SUB || t.Kind == lexer.ASSIGN_MUL {
 				err = errors.Join(err, parser.ParseArgAssign(scopeId))
 				break
 

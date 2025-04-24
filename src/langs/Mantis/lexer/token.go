@@ -13,7 +13,7 @@ func NewToken(pos utils.Pos, kind MantisTokenKind, repeat int, value ...rune) Ma
 	return MantisToken(stdLexer.NewToken(pos, kind, repeat, value...))
 }
 
-func AppendToken(tokens *[]MantisToken, token MantisToken) {
+func AppendToken(filename string, tokens *[]MantisToken, token MantisToken, subset int) error {
 	if tokens == nil {
 		tokens = &[]MantisToken{}
 	}
@@ -22,14 +22,18 @@ func AppendToken(tokens *[]MantisToken, token MantisToken) {
 		last := (*tokens)[count-1]
 		if last.Kind == token.Kind && string(last.Value) == string(token.Value) {
 			(*tokens)[count-1].Repeat = last.Repeat + 1
-			return
+			last = (*tokens)[count-1]
 		}
-		if c := CombineTokens(last.Kind, token.Kind); c != UNKNOW {
-			last.Kind = c
-			return
+		if c := CombineTokens(last, token); c != UNKNOW {
+			(*tokens)[count-1].Kind = c
+			return nil
 		}
 	}
+	if int(token.Kind)%100 > subset {
+		return utils.GetInvalidTokenPerSubset(filename, string(token.Value), token.Pos)
+	}
 	*tokens = append(*tokens, token)
+	return nil
 }
 
 func ResolveTokenId(filename string, token MantisToken) (MantisToken, error) {
@@ -65,6 +69,16 @@ func FindKeyword(word string) MantisTokenKind {
 		return KEY_ELSE
 	case word == "var":
 		return KEY_VAR
+	case word == "return":
+		return KEY_RETURN
+	case word == "repeat":
+		return KEY_REPEAT
+	case word == "match":
+		return KEY_MATCH
+	case word == "when":
+		return KEY_WHEN
+	case word == "in":
+		return KEY_IN
 	case word == "null":
 		return NIL
 	case word == "nil":

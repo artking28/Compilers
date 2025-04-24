@@ -2,11 +2,12 @@ package lexer
 
 import (
 	"compilers/utils"
+	"errors"
 	"os"
 	"strings"
 )
 
-func Tokenize(filename string) ([]MantisToken, error) {
+func Tokenize(filename string, subset int) ([]MantisToken, error) {
 
 	bytes, err := os.ReadFile(filename)
 	if err != nil {
@@ -18,7 +19,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 
 	var ret []MantisToken
 	column, line := 0, 1
-	isComment, islabel := false, false
+	isComment := false
 	runes := []rune(string(bytes))
 	buffer := strings.Builder{}
 	for i, run := range runes {
@@ -40,10 +41,7 @@ func Tokenize(filename string) ([]MantisToken, error) {
 					return nil, err
 				}
 			}
-			AppendToken(&ret, tk)
-			if islabel {
-				islabel = false
-			}
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			buffer.Reset()
 		}
 		switch run {
@@ -53,83 +51,98 @@ func Tokenize(filename string) ([]MantisToken, error) {
 			isComment = false
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, BREAK_LINE, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '\t':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, TAB, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '(':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, L_PAREN, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case ')':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, R_PAREN, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '{':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, L_BRACE, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '}':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, R_BRACE, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '=':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, ASSIGN, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '+':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, ADD, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '-':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, SUB, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '*':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, MUL, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '<':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, LOWER_THEN, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '>':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, GREATER_THEN, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case ' ':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, SPACE, 1, run)
 			// s := []Token[*MantisToken](ret)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case ',':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, COMMA, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case ':':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, COLON, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case ';':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, SEMICOLON, 1, run)
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
+			break
+		case '|':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, OR_BIT, 1, run)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
+			break
+		case '&':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, AND_BIT, 1, run)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
+			break
+		case '~':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, XOR_BIT, 1, run)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		case '/':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
@@ -138,22 +151,25 @@ func Tokenize(filename string) ([]MantisToken, error) {
 				isComment = true
 				i += 1
 				column++
-				AppendToken(&ret, tk)
+				err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 				break
 			}
-			AppendToken(&ret, tk)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
 		default:
 			if isComment {
 				buffer.WriteRune(run)
 				continue
 			}
-			return nil, utils.GetUnexpectedTokenErr(filename, string(run), utils.Pos{Line: int64(line) - 1, Column: int64(column)})
+			err = utils.GetUnexpectedTokenErr(filename, string(run), utils.Pos{Line: int64(line) - 1, Column: int64(column)})
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 
 	pos := utils.Pos{Line: int64(line), Column: int64(column)}
 	tk := NewToken(pos, EOF, 1, '0')
-	AppendToken(&ret, tk)
+	_ = AppendToken(filename, &ret, tk, subset)
 	return ret, nil
 }
