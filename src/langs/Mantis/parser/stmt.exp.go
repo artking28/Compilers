@@ -45,34 +45,6 @@ type (
 	}
 )
 
-func (this *MantisVExp) Resolve() (int, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (this *MantisExp) Resolve() (int, error) {
-	//TODO implement me
-	panic("implement me | MantisExp@WriteMemASM")
-}
-
-func (this MantisVExp) WriteMemASM() ([]uint16, error) {
-	//TODO implement me
-	panic("implement me | MantisVExp@WriteMemASM")
-}
-
-func (this MantisVExp) GetTitle() string {
-	return this.Title
-}
-
-func (this MantisExp) WriteMemASM() ([]uint16, error) {
-	//TODO implement me
-	panic("implement me | MantisExp@WriteMemASM")
-}
-
-func (this MantisExp) GetTitle() string {
-	return this.Title
-}
-
 func NewMantisVExp(value int, pos utils.Pos, parser *MantisParser) *MantisVExp {
 	return &MantisVExp{
 		VExp: *stdParser.NewVExp(value),

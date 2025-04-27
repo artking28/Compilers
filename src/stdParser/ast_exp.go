@@ -2,16 +2,21 @@ package stdParser
 
 type (
 	IExp interface {
+		Stmt
 		Resolve() (int, error)
+		GetType() string
 	}
 
 	Exp struct {
+		StmtBase
 		All  []IExp
 		Oper Operator
 	}
 
 	VExp struct {
+		StmtBase
 		Value int
+		Type  string
 	}
 
 	Operator int
@@ -25,9 +30,29 @@ func NewExp(all []IExp, oper Operator) *Exp {
 	return &Exp{All: all, Oper: oper}
 }
 
-func (e Exp) Resolve() (int, error) {
+func (this VExp) Resolve() (int, error) {
 	//TODO implement me
-	panic("implement me")
+	panic("implement me | VExp@Resolve")
+}
+
+func (this VExp) GetType() string {
+	return this.Type
+}
+
+func (this Exp) Resolve() (int, error) {
+	//TODO implement me
+	panic("implement me | Exp@Resolve")
+}
+
+func (this Exp) GetType() string {
+	switch this.Oper & (NumberOutput | BoolOutput) {
+	case NumberOutput:
+		return "number"
+	case BoolOutput:
+		return "bool"
+	default:
+		return "unknown"
+	}
 }
 
 const (
