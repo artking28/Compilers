@@ -51,13 +51,11 @@ func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariab
 			return nil, utils.GetExpectedTokenErr(parser.Filename, "colon token", parser.At())
 		}
 	} else {
-		if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.SPACE, lexer.EQUAL); err != nil {
+		if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.ASSIGN); err != nil {
 			return nil, utils.GetExpectedTokenErr(parser.Filename, "assign token", parser.At())
 		}
 	}
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, ExpTokens...); err != nil {
-		return nil, utils.GetExpectedTokenErr(parser.Filename, "expression value", parser.At())
-	}
+	//parser.Consume(-2)
 	value, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON)
 	if err != nil {
 		return nil, err
@@ -82,16 +80,16 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 	if t.Kind != lexer.ID || err != nil {
 		return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
 	}
-
+	//parser.Consume(1)
 	var names []string
 	var pos []utils.Pos
 	var values []stdParser.IExp
 	for first := false; true; {
-		nameTk, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.ID, lexer.COLON)
+		nameTk, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.ID, lexer.INIT)
 		if err != nil {
 			return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
 		}
-		if nameTk.Kind == lexer.COLON {
+		if nameTk.Kind == lexer.INIT {
 			if !first {
 				return nil, utils.GetExpectedTokenErr(parser.Filename, "at least one variable name", parser.At())
 			}
@@ -104,15 +102,19 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 		first = true
 		names = append(names, string(nameTk.Value))
 		pos = append(pos, nameTk.Pos)
-		end, err := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.COMMA, lexer.EQUAL, lexer.COLON)
+		end, err := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.COMMA, lexer.ASSIGN, lexer.INIT)
 		if err != nil {
 			return nil, utils.GetExpectedTokenErr(parser.Filename, "comma", parser.At())
 		}
-		if end.Kind == lexer.EQUAL || end.Kind == lexer.COLON {
+		if end.Kind == lexer.ASSIGN || end.Kind == lexer.INIT {
+			if end.Kind == lexer.INIT && !waitColon {
+				return nil, utils.GetExpectedTokenErr(parser.Filename, "assign token", parser.At())
+			}
 			parser.Consume(1)
 			break
 		}
 	}
+
 	for first := false; true; {
 		exp, err := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, append(ExpTokens, lexer.UNDERLINE)...)
 		if err != nil {
@@ -134,6 +136,15 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 			if err != nil {
 				return nil, err
 			}
+			if value == nil {
+				n := int(exp.Value[0])
+				if exp.Kind == lexer.UNDERLINE {
+					n = 0
+				}
+				values = append(values, NewMantisVExp(n, parser.At(), parser))
+				parser.Consume(1)
+				break
+			}
 			values = append(values, value)
 			h0 := parser.Get(0)
 			if h0 == nil {
@@ -143,7 +154,11 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 				break
 			}
 		}
-		values = append(values, NewMantisVExp(int(exp.Value[0]), parser.At(), parser))
+		n := int(exp.Value[0])
+		if exp.Kind == lexer.UNDERLINE {
+			n = 0
+		}
+		values = append(values, NewMantisVExp(n, parser.At(), parser))
 		parser.Consume(1)
 	}
 	if len(values) > len(names) {

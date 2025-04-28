@@ -13,6 +13,25 @@ func NewToken(pos utils.Pos, kind MantisTokenKind, repeat int, value ...rune) Ma
 	return MantisToken(stdLexer.NewToken(pos, kind, repeat, value...))
 }
 
+func (this MantisToken) IsSignal() bool {
+	return this.Kind == MUL ||
+		this.Kind == MOD ||
+		this.Kind == ADD ||
+		this.Kind == SUB ||
+		this.Kind == SHIFT_LEFT ||
+		this.Kind == SHIFT_RIGHT ||
+		this.Kind == AND_BIT ||
+		this.Kind == OR_BIT ||
+		this.Kind == XOR_BIT ||
+		this.Kind == LOWER_THEN ||
+		this.Kind == LOWER_EQUAL_THEN ||
+		this.Kind == GREATER_THEN ||
+		this.Kind == GREATER_EQUAL_THEN ||
+		this.Kind == AND_BOOL ||
+		this.Kind == OR_BOOL ||
+		this.Kind == XOR_BOOL
+}
+
 func AppendToken(filename string, tokens *[]MantisToken, token MantisToken, subset int) error {
 	if tokens == nil {
 		tokens = &[]MantisToken{}

@@ -5,6 +5,7 @@ type (
 		Stmt
 		Resolve() (int, error)
 		GetType() string
+		Values() int
 	}
 
 	Exp struct {
@@ -39,6 +40,10 @@ func (this VExp) GetType() string {
 	return this.Type
 }
 
+func (this VExp) Values() int {
+	return 1
+}
+
 func (this Exp) Resolve() (int, error) {
 	//TODO implement me
 	panic("implement me | Exp@Resolve")
@@ -53,6 +58,10 @@ func (this Exp) GetType() string {
 	default:
 		return "unknown"
 	}
+}
+
+func (this Exp) Values() int {
+	return len(this.All)
 }
 
 const (

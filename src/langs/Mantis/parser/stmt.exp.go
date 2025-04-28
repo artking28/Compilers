@@ -76,7 +76,7 @@ func (parser *MantisParser) ParseExpression(endAt ...lexer.MantisTokenKind) (std
 		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
 
-	var expList MantisExp
+	var expList stdParser.IExp
 	var expKind = ""
 	var lastSig = stdParser.Operator(0)
 	lastWasSig := false
@@ -100,51 +100,75 @@ func (parser *MantisParser) ParseExpression(endAt ...lexer.MantisTokenKind) (std
 					break
 				}
 			}
+		}
 
-			if h0.Kind == lexer.NUMBER {
-				if !lastWasSig {
-					return nil, utils.GetConsecutiveValuesErr(parser.Filename, h0.Pos)
-				}
-				lastWasSig = false
-				if expKind == "" {
-					expKind = "number"
-				}
-				if expKind != "number" {
-					return nil, utils.GetMismatchedTypesErr(parser.Filename, "bool", "number", h0.Pos)
-				}
-				expList.All = append(expList.All, NewMantisVExp(int(h0.Value[0]), h0.Pos, parser))
-			} else if h0.Kind == lexer.TRUE || h0.Kind == lexer.FALSE {
-				if !lastWasSig {
-					return nil, utils.GetConsecutiveValuesErr(parser.Filename, h0.Pos)
-				}
-				lastWasSig = false
-				if expKind == "" {
-					expKind = "bool"
-				}
-				if expKind != "bool" {
-					return nil, utils.GetMismatchedTypesErr(parser.Filename, "number", "bool", h0.Pos)
-				}
-				v := 1
-				if h0.Kind == lexer.FALSE {
-					v = 0
-				}
-				expList.All = append(expList.All, NewMantisVExp(v, h0.Pos, parser))
-			} else if h0.Kind == lexer.MUL || h0.Kind == lexer.SHIFT_LEFT || h0.Kind == lexer.SHIFT_RIGHT {
-				if lastWasSig {
-					return nil, utils.GetConsecutiveOperatorsErr(parser.Filename, h0.Pos)
-				}
-				levelComp := lastSig.Compare(Operators[h0.Kind])
-				lastWasSig = true
-				if levelComp >= 0 {
-					expList = *NewMantisExpChain([]stdParser.IExp{&expList}, Operators[h0.Kind], h0.Pos, parser)
+		if h0.Kind == lexer.NUMBER {
+			if !lastWasSig {
+				return nil, utils.GetConsecutiveValuesErr(parser.Filename, h0.Pos)
+			}
+			lastWasSig = false
+			if expKind == "" {
+				expKind = "number"
+			}
+			if expKind != "number" {
+				return nil, utils.GetMismatchedTypesErr(parser.Filename, "bool", "number", h0.Pos)
+			}
+			e := (expList).(*MantisExp)
+			e.All = append((expList).(MantisExp).All, NewMantisVExp(int(h0.Value[0]), h0.Pos, parser))
+		} else if h0.Kind == lexer.TRUE || h0.Kind == lexer.FALSE {
+			if !lastWasSig {
+				return nil, utils.GetConsecutiveValuesErr(parser.Filename, h0.Pos)
+			}
+			lastWasSig = false
+			if expKind == "" {
+				expKind = "bool"
+			}
+			if expKind != "bool" {
+				return nil, utils.GetMismatchedTypesErr(parser.Filename, "number", "bool", h0.Pos)
+			}
+			v := 1
+			if h0.Kind == lexer.FALSE {
+				v = 0
+			}
+			e := (expList).(*MantisExp)
+			e.All = append((expList).(MantisExp).All, NewMantisVExp(v, h0.Pos, parser))
+		} else if (*lexer.MantisToken)(h0).IsSignal() {
+			if lastWasSig {
+				return nil, utils.GetConsecutiveOperatorsErr(parser.Filename, h0.Pos)
+			}
+			levelComp := lastSig.Compare(Operators[h0.Kind])
+			lastWasSig = true
+			if levelComp >= 0 {
+				if expList != nil && expList.Values() > 1 {
+					expList = *NewMantisExpChain([]stdParser.IExp{expList}, Operators[h0.Kind], h0.Pos, parser)
+				} else if expList != nil && expList.Values() == 1 {
+					n, err := expList.Resolve()
+					if err != nil {
+						return nil, err
+					}
+					expList = NewMantisVExp(n, h0.Pos, parser)
 				} else {
-					expList.All = append(expList.All, NewMantisVExp(int(h0.Value[0]), h0.Pos, parser))
+					expList = NewMantisVExp(0, h0.Pos, parser)
 				}
 			} else {
-				return nil, utils.GetUnexpectedTokenErr(parser.Filename, string(h0.Value), h0.Pos)
+				if expList != nil && expList.Values() > 1 {
+					e := (expList).(*MantisExp)
+					e.All = append((expList).(MantisExp).All, NewMantisVExp(int(h0.Value[0]), h0.Pos, parser))
+				} else if expList != nil && expList.Values() == 1 {
+					n, err := expList.Resolve()
+					if err != nil {
+						return nil, err
+					}
+					expList = NewMantisVExp(n, h0.Pos, parser)
+				} else {
+					expList = NewMantisVExp(0, h0.Pos, parser)
+				}
 			}
+		} else {
+			return expList, nil
 		}
+
 		h0 = parser.Get(i)
 	}
-	return &expList, nil
+	return expList, nil
 }

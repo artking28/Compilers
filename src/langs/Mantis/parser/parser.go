@@ -84,9 +84,33 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 		// Parses a global variable
 		case lexer.KEY_VAR:
-			vd, e := parser.ParseSingleVarDef(scopeId)
-			err = errors.Join(e)
-			ret.Body.Statements = append(ret.Body.Statements, vd)
+			parser.Consume(1)
+			t, e0 := parser.GetFirstAfter(lexer.SPACE, lexer.ID)
+			if e0 != nil {
+				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
+				break
+			}
+
+			parser.Consume(-1)
+			if t.Kind == lexer.ID {
+				svd, e := parser.ParseSingleVarDef(scopeId)
+				err = errors.Join(e)
+				ret.Body.Statements = append(ret.Body.Statements, svd)
+				break
+
+				// Parses multi var definition
+			} else if t.Kind == lexer.COMMA {
+				mvd, e := parser.ParseMultiVarDef(scopeId)
+				err = errors.Join(e)
+				if mvd != nil {
+					for _, svd := range *mvd {
+						ret.Body.Statements = append(ret.Body.Statements, svd)
+					}
+				}
+				break
+			}
+
+			err = errors.Join(err, utils.GetExpectedTokenErr(parser.Filename, "some token to create a variable definition, an assigment or function call", tk.Pos))
 			break
 
 		// Parses a variable definition, assigment or function call
@@ -113,13 +137,15 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 			} else if t.Kind == lexer.COMMA {
 				mvd, e := parser.ParseMultiVarDef(scopeId)
 				err = errors.Join(e)
-				for _, svd := range *mvd {
-					ret.Body.Statements = append(ret.Body.Statements, svd)
+				if mvd != nil {
+					for _, svd := range *mvd {
+						ret.Body.Statements = append(ret.Body.Statements, svd)
+					}
 				}
 				break
 
 				// Parses assignment
-			} else if t.Kind == lexer.EQUAL {
+			} else if t.Kind == lexer.ASSIGN {
 				err = errors.Join(err, parser.ParseAssign(scopeId))
 				break
 
@@ -136,10 +162,9 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				break
 
 				// Error
-			} else {
-				err = errors.Join(err, utils.GetExpectedTokenErr(parser.Filename, "some token to create a variable definition, an assigment or function call", tk.Pos))
-				break
 			}
+			err = errors.Join(err, utils.GetExpectedTokenErr(parser.Filename, "some token to create a variable definition, an assigment or function call", tk.Pos))
+			break
 
 		// Parses an if statement
 		case lexer.KEY_IF:

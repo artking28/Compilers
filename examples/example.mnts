@@ -3,7 +3,7 @@
 fun main() {
 
     // One var, one value
-    foo := 6
+    // foo := 6
 
     foo += 1 + 1 - 11
 
@@ -11,7 +11,7 @@ fun main() {
     bar, baz := 5
 
     // Two vars, one value and 0 value
-    thud, corge := 8, _
+    thud, corge, ts, ps := 8, _, 4
 
     // Two vars, two values
     alpha, romeo := 4, 1

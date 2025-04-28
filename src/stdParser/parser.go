@@ -49,10 +49,15 @@ func (this *Parser[T]) Consume(n int) {
 	this.Cursor += n
 }
 
-func (this *Parser[T]) GetFirstAfter(afterOf T) (*stdLexer.Token[T], error) {
+func (this *Parser[T]) GetFirstAfter(afterOf ...T) (*stdLexer.Token[T], error) {
+	all := map[T]bool{}
+	for _, t := range afterOf {
+		all[t] = true
+	}
+
 	token := this.Get(0)
 	for i := 1; token != nil; i++ {
-		if token.Kind == afterOf {
+		if all[token.Kind] {
 			token = this.Get(i)
 			continue
 		}
