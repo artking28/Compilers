@@ -187,35 +187,35 @@ func (this *MantisTokenKind) String() (s string) {
 	return s
 }
 
-func CombineTokens(tk0, tk1 MantisToken) MantisTokenKind {
+func CombineTokens(tk0, tk1 MantisToken) (MantisTokenKind, []rune) {
 
 	if tk0.Kind == COLON && tk1.Kind == ASSIGN {
-		return INIT
+		return INIT, []rune(":=")
 	} else if tk0.Kind == ADD && tk1.Kind == ASSIGN {
-		return ASSIGN_ADD
+		return ASSIGN_ADD, []rune("+=")
 	} else if tk0.Kind == SUB && tk1.Kind == ASSIGN {
-		return ASSIGN_SUB
+		return ASSIGN_SUB, []rune("-=")
 	} else if tk0.Kind == MOD && tk1.Kind == ASSIGN {
-		return ASSIGN_MOD
+		return ASSIGN_MOD, []rune("%=")
 	} else if tk0.Kind == MUL && tk1.Kind == ASSIGN {
-		return ASSIGN_MUL
+		return ASSIGN_MUL, []rune("*=")
 	} else if tk0.Kind == ASSIGN && tk1.Kind == ASSIGN {
-		return EQUAL
+		return EQUAL, []rune("==")
 	} else if tk0.Kind == GREATER_THEN && tk1.Kind == ASSIGN {
-		return GREATER_EQUAL_THEN
+		return GREATER_EQUAL_THEN, []rune(">=")
 	} else if tk0.Kind == LOWER_THEN && tk1.Kind == ASSIGN {
-		return LOWER_EQUAL_THEN
+		return LOWER_EQUAL_THEN, []rune("<=")
 	} else if tk0.Kind == GREATER_THEN && tk1.Kind == GREATER_THEN {
-		return SHIFT_RIGHT
+		return SHIFT_RIGHT, []rune(">>")
 	} else if tk0.Kind == AND_BIT && tk1.Kind == AND_BIT {
-		return AND_BOOL
+		return AND_BOOL, []rune("&&")
 	} else if tk0.Kind == OR_BIT && tk1.Kind == OR_BIT {
-		return OR_BOOL
+		return OR_BOOL, []rune("||")
 	} else if tk0.Kind == XOR_BIT && tk1.Kind == XOR_BIT {
-		return XOR_BOOL
+		return XOR_BOOL, []rune("~~")
 	} else if tk0.Kind == SLASH && tk1.Kind == SLASH {
-		return COMMENT_LINE
+		return COMMENT_LINE, []rune("//")
 	} else {
-		return UNKNOW
+		return UNKNOW, []rune("")
 	}
 }

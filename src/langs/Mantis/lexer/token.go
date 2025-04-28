@@ -43,8 +43,9 @@ func AppendToken(filename string, tokens *[]MantisToken, token MantisToken, subs
 			(*tokens)[count-1].Repeat = last.Repeat + 1
 			last = (*tokens)[count-1]
 		}
-		if c := CombineTokens(last, token); c != UNKNOW {
+		if c, v := CombineTokens(last, token); c != UNKNOW {
 			(*tokens)[count-1].Kind = c
+			(*tokens)[count-1].Value = v
 			return nil
 		}
 	}

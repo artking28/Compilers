@@ -23,8 +23,11 @@ type (
 	Operator int
 )
 
-func NewVExp(value int) *VExp {
-	return &VExp{Value: value}
+func NewVExp(value int, typeOf string) *VExp {
+	return &VExp{
+		Value: value,
+		Type:  typeOf,
+	}
 }
 
 func NewExp(all []IExp, oper Operator) *Exp {

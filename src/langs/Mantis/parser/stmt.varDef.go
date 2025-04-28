@@ -56,7 +56,7 @@ func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariab
 		}
 	}
 	//parser.Consume(-2)
-	value, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON)
+	value, _, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 		}
 		if t.Kind != lexer.COMMA {
-			value, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON, lexer.COMMA)
+			value, typeOf, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON, lexer.COMMA)
 			if err != nil {
 				return nil, err
 			}
@@ -141,7 +141,7 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 				if exp.Kind == lexer.UNDERLINE {
 					n = 0
 				}
-				values = append(values, NewMantisVExp(n, parser.At(), parser))
+				values = append(values, NewMantisVExp(n, parser.At(), typeOf, parser))
 				parser.Consume(1)
 				break
 			}
@@ -158,7 +158,11 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 		if exp.Kind == lexer.UNDERLINE {
 			n = 0
 		}
-		values = append(values, NewMantisVExp(n, parser.At(), parser))
+		typeOf := "bool"
+		if exp.Kind == lexer.NUMBER {
+			typeOf = "number"
+		}
+		values = append(values, NewMantisVExp(n, parser.At(), typeOf, parser))
 		parser.Consume(1)
 	}
 	if len(values) > len(names) {

@@ -7,6 +7,10 @@ fun main() {
 
     foo += 1 + 1 - 11
 
+	b := true
+
+	bl := false
+
     // Two vars, same value for both
     bar, baz := 5
 
