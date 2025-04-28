@@ -78,34 +78,34 @@ func ResolveTokenId(filename string, token MantisToken) (MantisToken, error) {
 }
 
 func FindKeyword(word string) MantisTokenKind {
-	switch {
-	case word == "fun":
+	switch word {
+	case "fun":
 		return KEY_FUN
-	case word == "for":
+	case "for":
 		return KEY_FOR
-	case word == "if":
+	case "if":
 		return KEY_IF
-	case word == "else":
+	case "else":
 		return KEY_ELSE
-	case word == "var":
+	case "var":
 		return KEY_VAR
-	case word == "return":
+	case "return":
 		return KEY_RETURN
-	case word == "repeat":
+	case "repeat":
 		return KEY_REPEAT
-	case word == "match":
+	case "match":
 		return KEY_MATCH
-	case word == "when":
+	case "when":
 		return KEY_WHEN
-	case word == "in":
+	case "in":
 		return KEY_IN
-	case word == "null":
+	case "null":
 		return NIL
-	case word == "nil":
+	case "nil":
 		return NIL
-	case word == "true":
+	case "true":
 		return TRUE
-	case word == "false":
+	case "false":
 		return FALSE
 	default:
 		return UNKNOW

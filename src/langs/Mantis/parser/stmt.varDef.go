@@ -55,7 +55,7 @@ func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariab
 			return nil, utils.GetExpectedTokenErr(parser.Filename, "assign token", parser.At())
 		}
 	}
-	//parser.Consume(-2)
+	parser.Consume(1)
 	value, _, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON)
 	if err != nil {
 		return nil, err
