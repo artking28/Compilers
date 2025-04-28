@@ -56,7 +56,7 @@ func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariab
 		}
 	}
 	parser.Consume(1)
-	value, _, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON)
+	value, _, err := parser.ParseExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 		}
 		if t.Kind != lexer.COMMA {
-			value, typeOf, err := parser.ParseExpression(lexer.BREAK_LINE, lexer.SEMICOLON, lexer.COMMA)
+			value, _, err := parser.ParseExpression()
 			if err != nil {
 				return nil, err
 			}
@@ -141,7 +141,7 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 				if exp.Kind == lexer.UNDERLINE {
 					n = 0
 				}
-				values = append(values, NewMantisVExp(n, parser.At(), typeOf, parser))
+				values = append(values, NewMantisVExp(n, parser.At(), "number", parser))
 				parser.Consume(1)
 				break
 			}

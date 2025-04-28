@@ -70,7 +70,7 @@ func NewMantisExpChain(exps []stdParser.IExp, oper stdParser.Operator, pos utils
 	}
 }
 
-func (parser *MantisParser) ParseExpression(endAt ...lexer.MantisTokenKind) (stdParser.IExp, string, error) {
+func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 	h0 := parser.Get(0)
 	if h0 == nil {
 		return nil, "", utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
