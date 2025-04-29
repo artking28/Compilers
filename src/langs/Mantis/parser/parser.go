@@ -23,6 +23,10 @@ type (
 	}
 )
 
+func (this MantisStmtBase) GetTitle() string {
+	return this.Title
+}
+
 func NewMantisParser(filename, output string, subset int) (*MantisParser, error) {
 
 	tokens, err := lexer.Tokenize(filename, subset)
@@ -118,14 +122,14 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 			if scopeType == utils.RootScope {
 				return ret, utils.GetUnexpectedTokenNoPosErr(parser.Filename, string(tk.Value))
 			}
-			parser.Consume(1)
-			t, e0 := parser.GetFirstAfter(lexer.SPACE)
+			//parser.Consume(1)
+			t, e0 := parser.GetFirstAfter(lexer.SPACE, lexer.ID)
 			if e0 != nil {
 				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
 				break
 			}
 
-			parser.Consume(-1)
+			//parser.Consume(-1)
 			// Parses single var definition
 			if t.Kind == lexer.INIT {
 				svd, e := parser.ParseSingleVarDef(scopeId)
@@ -150,8 +154,15 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				break
 
 				// Parses augmented assignment
-			} else if t.Kind == lexer.ASSIGN_ADD || t.Kind == lexer.ASSIGN_SUB || t.Kind == lexer.ASSIGN_MUL {
-				err = errors.Join(err, parser.ParseArgAssign(scopeId))
+			} else if t.Kind == lexer.ASSIGN_ADD ||
+				t.Kind == lexer.ASSIGN_SUB ||
+				t.Kind == lexer.ASSIGN_MUL ||
+				t.Kind == lexer.ASSIGN_AND_BIT ||
+				t.Kind == lexer.ASSIGN_XOR_BIT ||
+				t.Kind == lexer.ASSIGN_OR_BIT ||
+				t.Kind == lexer.ASSIGN_SHIFT_RIGHT ||
+				t.Kind == lexer.ASSIGN_SHIFT_LEFT {
+				err = errors.Join(err, parser.ParseArgAssign(scopeId, tk.Kind))
 				break
 
 				// Parses function call

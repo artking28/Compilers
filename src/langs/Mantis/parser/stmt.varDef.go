@@ -30,10 +30,6 @@ func NewVariableStmt(name string, pos utils.Pos, value stdParser.IExp, owner uin
 	return ret
 }
 
-func (this MantisVariable) GetTitle() string {
-	return this.Title
-}
-
 func (parser *MantisParser) ParseSingleVarDef(scopeId uint64) (ret *MantisVariable, err error) {
 	waitColon, nameTk := true, parser.Get(0)
 	if nameTk == nil {

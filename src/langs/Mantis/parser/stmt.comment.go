@@ -26,10 +26,6 @@ func (this CommentStmt) WriteMemASM() ([]uint16, error) {
 	panic("implement me | CommentStmt@WriteMemASM")
 }
 
-func (this CommentStmt) GetTitle() string {
-	return this.Title
-}
-
 func (parser *MantisParser) ParseComment() (*CommentStmt, error) {
 	var comment string
 	h0 := parser.Get(0)

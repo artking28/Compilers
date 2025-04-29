@@ -17,10 +17,6 @@ func (this FuncCall) WriteMemASM() ([]uint16, error) {
 	panic("implement me | FuncCall@WriteMemASM")
 }
 
-func (this FuncCall) GetTitle() string {
-	return this.Title
-}
-
 func NewFuncCall(name string, from uint64, pos utils.Pos, parser *MantisParser) *FuncCall {
 	return &FuncCall{
 		Name: name,

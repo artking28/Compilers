@@ -17,10 +17,6 @@ func (this FuncStmt) WriteMemASM() ([]uint16, error) {
 	panic("implement me | FuncStmt@WriteMemASM")
 }
 
-func (this FuncStmt) GetTitle() string {
-	return this.Title
-}
-
 func NewFuncStmt(name string, body stdParser.Scope, pos utils.Pos, parser *MantisParser) *FuncStmt {
 	return &FuncStmt{
 		Name: name,
