@@ -129,7 +129,7 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 			if first {
 				return nil, utils.GetExpectedTokenErr(parser.Filename, "at least one variable value", parser.At())
 			}
-			exp = NewMantisVExp((Mantis.GetZeroValue(last)).(int), parser.At(), last, parser)
+			exp = NewMantisVExp((mantis.GetZeroValue(last)).(int), parser.At(), last, parser)
 			values = append(values, exp)
 		}
 

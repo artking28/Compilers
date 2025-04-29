@@ -1,4 +1,4 @@
-package Mantis
+package mantis
 
 func GetZeroValue(typeOf string) any {
 	switch typeOf {
