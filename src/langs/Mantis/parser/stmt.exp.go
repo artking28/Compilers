@@ -102,7 +102,10 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 			}
 		}
 
-		if h0.Kind == lexer.NUMBER {
+		if h0.Kind == lexer.UNDERLINE {
+			parser.Consume(1)
+			return nil, "", nil
+		} else if h0.Kind == lexer.NUMBER {
 			if expList != nil && !lastWasSig {
 				return nil, "", utils.GetConsecutiveValuesErr(parser.Filename, h0.Pos)
 			}
@@ -177,7 +180,8 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 			return expList, expKind, nil
 		}
 
-		h0 = parser.Get(i + 1)
+		parser.Consume(1)
+		h0 = parser.Get(0)
 	}
 	return expList, expKind, nil
 }

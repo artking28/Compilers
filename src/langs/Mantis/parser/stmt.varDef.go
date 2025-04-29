@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"compilers/langs/Mantis"
 	"compilers/langs/Mantis/lexer"
 	"compilers/stdParser"
 	"compilers/utils"
@@ -115,54 +116,31 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 		}
 	}
 
-	for first := false; true; {
-		exp, err := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, append(ExpTokens, lexer.UNDERLINE)...)
+	last := ""
+	for first := true; true; {
+		exp, typeOf, err := parser.ParseExpression()
 		if err != nil {
-			return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
+			return nil, err
 		}
-		if exp.Kind == lexer.UNDERLINE {
-			if !first {
+		if exp != nil {
+			values = append(values, exp)
+			last = typeOf
+		} else {
+			if first {
 				return nil, utils.GetExpectedTokenErr(parser.Filename, "at least one variable value", parser.At())
 			}
+			exp = NewMantisVExp((Mantis.GetZeroValue(last)).(int), parser.At(), last, parser)
+			values = append(values, exp)
 		}
 
-		first = true
-		t, err := parser.GetFirstAfter(lexer.SPACE)
+		first = false
+		tk, err := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.COMMA, lexer.BREAK_LINE)
 		if err != nil {
-			return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+			return nil, utils.GetExpectedTokenErr(parser.Filename, "comma or break line", parser.At())
 		}
-		if t.Kind != lexer.COMMA {
-			value, _, err := parser.ParseExpression()
-			if err != nil {
-				return nil, err
-			}
-			if value == nil {
-				n := int(exp.Value[0])
-				if exp.Kind == lexer.UNDERLINE {
-					n = 0
-				}
-				values = append(values, NewMantisVExp(n, parser.At(), "number", parser))
-				parser.Consume(1)
-				break
-			}
-			values = append(values, value)
-			h0 := parser.Get(0)
-			if h0 == nil {
-				return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
-			}
-			if h0.Kind == lexer.SEMICOLON || h0.Kind == lexer.BREAK_LINE {
-				break
-			}
+		if tk.Kind == lexer.BREAK_LINE {
+			break
 		}
-		n := int(exp.Value[0])
-		if exp.Kind == lexer.UNDERLINE {
-			n = 0
-		}
-		typeOf := "bool"
-		if exp.Kind == lexer.NUMBER {
-			typeOf = "number"
-		}
-		values = append(values, NewMantisVExp(n, parser.At(), typeOf, parser))
 		parser.Consume(1)
 	}
 	if len(values) > len(names) {
