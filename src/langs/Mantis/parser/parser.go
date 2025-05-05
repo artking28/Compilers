@@ -147,13 +147,9 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				}
 				break
 
-				// Parses assignment
-			} else if t.Kind == lexer.ASSIGN {
-				err = errors.Join(err, parser.ParseAssign(scopeId))
-				break
-
-				// Parses augmented assignment
-			} else if t.Kind == lexer.ASSIGN_ADD ||
+				// Parses assignments
+			} else if t.Kind == lexer.ASSIGN ||
+				t.Kind == lexer.ASSIGN_ADD ||
 				t.Kind == lexer.ASSIGN_SUB ||
 				t.Kind == lexer.ASSIGN_MUL ||
 				t.Kind == lexer.ASSIGN_AND_BIT ||
