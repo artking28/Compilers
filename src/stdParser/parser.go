@@ -55,7 +55,7 @@ func (this *Parser[T]) GetFirstAfter(afterOf ...T) (*stdLexer.Token[T], error) {
 		all[t] = true
 	}
 
-	token := this.Get(0)
+	token := this.Get(1)
 	for i := 1; token != nil; i++ {
 		if all[token.Kind] {
 			token = this.Get(i)

@@ -122,14 +122,13 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 			if scopeType == utils.RootScope {
 				return ret, utils.GetUnexpectedTokenNoPosErr(parser.Filename, string(tk.Value))
 			}
-			//parser.Consume(1)
+
 			t, e0 := parser.GetFirstAfter(lexer.SPACE, lexer.ID)
 			if e0 != nil {
 				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
 				break
 			}
 
-			//parser.Consume(-1)
 			// Parses single var definition
 			if t.Kind == lexer.INIT {
 				svd, e := parser.ParseSingleVarDef(scopeId)
@@ -162,7 +161,10 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				t.Kind == lexer.ASSIGN_OR_BIT ||
 				t.Kind == lexer.ASSIGN_SHIFT_RIGHT ||
 				t.Kind == lexer.ASSIGN_SHIFT_LEFT {
-				err = errors.Join(err, parser.ParseArgAssign(scopeId, tk.Kind))
+
+				assignStmt, e := parser.ParseArgAssign(scopeId, t.Kind)
+				err = errors.Join(err, e)
+				ret.Body.Statements = append(ret.Body.Statements, assignStmt)
 				break
 
 				// Parses function call

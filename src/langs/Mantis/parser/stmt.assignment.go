@@ -37,45 +37,46 @@ func (parser *MantisParser) ParseArgAssign(scopeId uint64, kind lexer.MantisToke
 	if h0 == nil {
 		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
-
-	nameVar, err := parser.HasNextConsume(stdParser.MandatorySpaceMode, lexer.SPACE, lexer.ID)
-	if nameVar == nil {
-		return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", h0.Pos)
-	}
-
-	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.SPACE, kind); err != nil {
+	parser.Consume(1)
+	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, kind); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "assignment", err.Error(), h0.Pos)
 	}
 
 	parser.Consume(1)
-	exp, typeof, err := parser.ParseExpression()
+	assignValue, _, err := parser.ParseExpression()
 	if err != nil {
 		return nil, err
 	}
 
-	variable := parser.Variables[typeof]
-	if variable.Type != "number" || exp.GetType() != "number" {
+	variable := parser.Variables[string(h0.Value)]
+	//if variable.Type != "number" || exp.GetType() != "number" {
+	//
+	//}
 
-	}
-
+	var exp stdParser.IExp
 	switch kind {
 	case lexer.ASSIGN_ADD:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.ADD], h0.Pos, parser)
 	case lexer.ASSIGN_SUB:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.SUB], h0.Pos, parser)
 	case lexer.ASSIGN_MUL:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.MUL], h0.Pos, parser)
 	case lexer.ASSIGN_AND_BIT:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.AND_BIT], h0.Pos, parser)
 	case lexer.ASSIGN_XOR_BIT:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.XOR_BIT], h0.Pos, parser)
 	case lexer.ASSIGN_OR_BIT:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.OR_BIT], h0.Pos, parser)
 	case lexer.ASSIGN_SHIFT_RIGHT:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.SHIFT_RIGHT], h0.Pos, parser)
 	case lexer.ASSIGN_SHIFT_LEFT:
-
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.SHIFT_LEFT], h0.Pos, parser)
+	default:
+		panic("implement me | ParseArgAssign switch case")
 	}
 
+	if variable == nil {
+		return nil, utils.GetUnkownVariableErr(parser.Filename, string(h0.Value), h0.Pos)
+	}
 	return NewAssignStmt(variable.Id, exp, h0.Pos, parser), nil
 }

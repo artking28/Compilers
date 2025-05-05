@@ -78,7 +78,7 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 
 	var expList stdParser.IExp
 	var expKind = ""
-	var lastSig = stdParser.Operator(0)
+	var lastSig = Operators[lexer.ADD]
 	lastWasSig := false
 
 	for i := 0; h0 != nil; i++ {
@@ -92,11 +92,14 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 				if hs.Kind == lexer.ADD || hs.Kind == lexer.SUB {
 					if hs.Kind == h0.Kind {
 						h0.Kind = lexer.ADD
+						parser.Consume(1)
 						continue
 					}
 					h0.Kind = lexer.SUB
-				} else {
 					lastSig = Operators[h0.Kind]
+				} else {
+					//lastSig = Operators[h0.Kind]
+					//lastWasSig = true
 					break
 				}
 			}
@@ -120,8 +123,12 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 			if expList == nil {
 				expList = NewMantisVExp(n, h0.Pos, expKind, parser)
 			} else {
-				e := (expList).(*MantisExp)
-				e.All = append((expList).(MantisExp).All, NewMantisVExp(n, h0.Pos, expKind, parser))
+				e, ok := (expList).(*MantisExp)
+				if ok {
+					e.All = append(e.All, NewMantisVExp(n, h0.Pos, expKind, parser))
+				} else {
+					expList = NewMantisExpChain([]stdParser.IExp{expList, NewMantisVExp(n, h0.Pos, expKind, parser)}, lastSig, h0.Pos, parser)
+				}
 			}
 		} else if h0.Kind == lexer.TRUE || h0.Kind == lexer.FALSE {
 			if expList != nil && !lastWasSig {
@@ -144,38 +151,45 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 				e := (expList).(*MantisExp)
 				e.All = append((expList).(MantisExp).All, NewMantisVExp(v, h0.Pos, expKind, parser))
 			}
+		} else if h0.Kind == lexer.SPACE {
+			parser.Consume(1)
+			h0 = parser.Get(0)
+			continue
 		} else if (*lexer.MantisToken)(h0).IsSignal() {
 			if expList != nil && lastWasSig {
 				return nil, "", utils.GetConsecutiveOperatorsErr(parser.Filename, h0.Pos)
 			}
 			levelComp := lastSig.Compare(Operators[h0.Kind])
 			lastWasSig = true
-			if levelComp >= 0 {
-				if expList != nil && expList.Values() > 1 {
-					expList = *NewMantisExpChain([]stdParser.IExp{expList}, Operators[h0.Kind], h0.Pos, parser)
-				} else if expList != nil && expList.Values() == 1 {
-					n, err := expList.Resolve()
-					if err != nil {
-						return nil, "", err
+			if lastSig != Operators[h0.Kind] {
+				if levelComp >= 0 {
+					if expList != nil && expList.Values() > 1 {
+						expList = NewMantisExpChain([]stdParser.IExp{expList}, Operators[h0.Kind], h0.Pos, parser)
+					} else if expList != nil && expList.Values() == 1 {
+						n, err := expList.Resolve()
+						if err != nil {
+							return nil, "", err
+						}
+						expList = NewMantisVExp(n, h0.Pos, expKind, parser)
+					} else {
+						expList = NewMantisVExp(0, h0.Pos, expKind, parser)
 					}
-					expList = NewMantisVExp(n, h0.Pos, expKind, parser)
 				} else {
-					expList = NewMantisVExp(0, h0.Pos, expKind, parser)
-				}
-			} else {
-				if expList != nil && expList.Values() > 1 {
-					e := (expList).(*MantisExp)
-					e.All = append((expList).(MantisExp).All, NewMantisVExp(int(h0.Value[0]), h0.Pos, expKind, parser))
-				} else if expList != nil && expList.Values() == 1 {
-					n, err := expList.Resolve()
-					if err != nil {
-						return nil, "", err
+					if expList != nil && expList.Values() > 1 {
+						e := (expList).(*MantisExp)
+						e.All = append((expList).(MantisExp).All, NewMantisVExp(int(h0.Value[0]), h0.Pos, expKind, parser))
+					} else if expList != nil && expList.Values() == 1 {
+						n, err := expList.Resolve()
+						if err != nil {
+							return nil, "", err
+						}
+						expList = NewMantisVExp(n, h0.Pos, expKind, parser)
+					} else {
+						expList = NewMantisVExp(0, h0.Pos, expKind, parser)
 					}
-					expList = NewMantisVExp(n, h0.Pos, expKind, parser)
-				} else {
-					expList = NewMantisVExp(0, h0.Pos, expKind, parser)
 				}
 			}
+			lastSig = Operators[h0.Kind]
 		} else {
 			return expList, expKind, nil
 		}

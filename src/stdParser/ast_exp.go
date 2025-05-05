@@ -35,8 +35,7 @@ func NewExp(all []IExp, oper Operator) *Exp {
 }
 
 func (this VExp) Resolve() (int, error) {
-	//TODO implement me
-	panic("implement me | VExp@Resolve")
+	return this.Value, nil
 }
 
 func (this VExp) GetType() string {

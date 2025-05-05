@@ -70,19 +70,19 @@ func (parser *MantisParser) ParseMultiVarDef(scopeId uint64) (*[]MantisVariable,
 		parser.Consume(1)
 		waitColon = false
 	}
-	t, err := parser.GetFirstAfter(lexer.SPACE)
-	if t == nil {
-		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
-	}
-	if t.Kind != lexer.ID || err != nil {
-		return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
-	}
-	//parser.Consume(1)
+	//t, err := parser.GetFirstAfter(lexer.SPACE)
+	//if t == nil {
+	//	return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
+	//}
+	//if t.Kind != lexer.ID || err != nil {
+	//	return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
+	//}
+
 	var names []string
 	var pos []utils.Pos
 	var values []stdParser.IExp
 	for first := false; true; {
-		nameTk, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.ID, lexer.INIT)
+		nameTk, err := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.ID, lexer.INIT)
 		if err != nil {
 			return nil, utils.GetExpectedTokenErr(parser.Filename, "variable name", parser.At())
 		}
