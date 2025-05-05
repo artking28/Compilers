@@ -56,22 +56,34 @@ func (parser *MantisParser) ParseArgAssign(scopeId uint64, kind lexer.MantisToke
 	switch kind {
 	case lexer.ASSIGN_ADD:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.ADD], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_SUB:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.SUB], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_MUL:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.MUL], h0.Pos, parser)
+		break
+	case lexer.ASSIGN_MOD:
+		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.MOD], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_AND_BIT:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.AND_BIT], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_XOR_BIT:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.XOR_BIT], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_OR_BIT:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.OR_BIT], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_SHIFT_RIGHT:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.SHIFT_RIGHT], h0.Pos, parser)
+		break
 	case lexer.ASSIGN_SHIFT_LEFT:
 		exp = NewMantisExpChain([]stdParser.IExp{variable, assignValue}, Operators[lexer.SHIFT_LEFT], h0.Pos, parser)
+		break
 	case lexer.ASSIGN:
 		exp = assignValue
+		break
 	default:
 		panic("implement me | ParseArgAssign switch case")
 	}

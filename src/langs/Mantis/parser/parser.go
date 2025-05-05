@@ -88,14 +88,12 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 
 		// Parses a global variable
 		case lexer.KEY_VAR:
-			parser.Consume(1)
-			t, e0 := parser.GetFirstAfter(lexer.SPACE, lexer.ID)
+			t, e0 := parser.GetFirstAfter(lexer.SPACE, lexer.KEY_VAR)
 			if e0 != nil {
 				err = errors.Join(err, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF"))
 				break
 			}
 
-			parser.Consume(-1)
 			if t.Kind == lexer.ID {
 				svd, e := parser.ParseSingleVarDef(scopeId)
 				err = errors.Join(e)
@@ -152,6 +150,7 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 				t.Kind == lexer.ASSIGN_ADD ||
 				t.Kind == lexer.ASSIGN_SUB ||
 				t.Kind == lexer.ASSIGN_MUL ||
+				t.Kind == lexer.ASSIGN_MOD ||
 				t.Kind == lexer.ASSIGN_AND_BIT ||
 				t.Kind == lexer.ASSIGN_XOR_BIT ||
 				t.Kind == lexer.ASSIGN_OR_BIT ||

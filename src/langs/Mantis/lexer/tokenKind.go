@@ -204,14 +204,26 @@ func CombineTokens(tk0, tk1 MantisToken) (MantisTokenKind, []rune) {
 		return ASSIGN_MOD, []rune("%=")
 	} else if tk0.Kind == MUL && tk1.Kind == ASSIGN {
 		return ASSIGN_MUL, []rune("*=")
+	} else if tk0.Kind == AND_BIT && tk1.Kind == ASSIGN {
+		return ASSIGN_AND_BIT, []rune("&=")
+	} else if tk0.Kind == OR_BIT && tk1.Kind == ASSIGN {
+		return ASSIGN_OR_BIT, []rune("|=")
+	} else if tk0.Kind == XOR_BIT && tk1.Kind == ASSIGN {
+		return ASSIGN_XOR_BIT, []rune("~=")
 	} else if tk0.Kind == ASSIGN && tk1.Kind == ASSIGN {
 		return EQUAL, []rune("==")
-	} else if tk0.Kind == GREATER_THEN && tk1.Kind == ASSIGN {
-		return GREATER_EQUAL_THEN, []rune(">=")
-	} else if tk0.Kind == LOWER_THEN && tk1.Kind == ASSIGN {
-		return LOWER_EQUAL_THEN, []rune("<=")
 	} else if tk0.Kind == GREATER_THEN && tk1.Kind == GREATER_THEN {
 		return SHIFT_RIGHT, []rune(">>")
+	} else if tk0.Kind == SHIFT_RIGHT && tk1.Kind == ASSIGN {
+		return ASSIGN_SHIFT_RIGHT, []rune(">>=")
+	} else if tk0.Kind == GREATER_THEN && tk1.Kind == ASSIGN {
+		return GREATER_EQUAL_THEN, []rune(">=")
+	} else if tk0.Kind == LOWER_THEN && tk1.Kind == LOWER_THEN {
+		return SHIFT_LEFT, []rune("<<")
+	} else if tk0.Kind == SHIFT_LEFT && tk1.Kind == ASSIGN {
+		return ASSIGN_SHIFT_LEFT, []rune("<<=")
+	} else if tk0.Kind == LOWER_THEN && tk1.Kind == ASSIGN {
+		return LOWER_EQUAL_THEN, []rune("<=")
 	} else if tk0.Kind == AND_BIT && tk1.Kind == AND_BIT {
 		return AND_BOOL, []rune("&&")
 	} else if tk0.Kind == OR_BIT && tk1.Kind == OR_BIT {
