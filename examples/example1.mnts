@@ -1,0 +1,64 @@
+
+
+fun main() {
+
+	h := 5
+
+	h = 10
+
+	h = 2 + 16 | 6 & 8 ~ 2 - 8 << 2 >> 1 % 10
+
+	h += 2
+
+	h -= 2
+
+	h &= 2
+
+	h |= 2
+
+	h ~= 2
+
+	h %= 2
+
+	h <<= 2
+
+	h >>= 2
+
+    var t = true
+
+    var f = false
+
+	if h == 10 && t || f {
+		q := 7
+		print(h + q)
+	} else {
+		print(0)
+	}
+
+	for i:=0; i<10; i++ {
+		print(i)
+	}
+
+	for {
+		var i = 0
+		i++
+		if i > 10 {
+			break
+		}
+	}
+
+	for false {
+
+	}
+
+	exit(0)
+}
+
+
+
+
+
+
+
+
+

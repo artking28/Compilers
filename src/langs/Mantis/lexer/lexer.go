@@ -144,6 +144,11 @@ func Tokenize(filename string, subset int) ([]MantisToken, error) {
 			tk := NewToken(pos, XOR_BIT, 1, run)
 			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
 			break
+		case '%':
+			pos := utils.Pos{Line: int64(line), Column: int64(column)}
+			tk := NewToken(pos, MOD, 1, run)
+			err = errors.Join(err, AppendToken(filename, &ret, tk, subset))
+			break
 		case '/':
 			pos := utils.Pos{Line: int64(line), Column: int64(column)}
 			tk := NewToken(pos, SLASH, 1, run)
@@ -161,7 +166,7 @@ func Tokenize(filename string, subset int) ([]MantisToken, error) {
 				buffer.WriteRune(run)
 				continue
 			}
-			err = utils.GetUnexpectedTokenErr(filename, string(run), utils.Pos{Line: int64(line) - 1, Column: int64(column)})
+			err = utils.GetUnexpectedTokenErr(filename, string(run), utils.Pos{Line: int64(line), Column: int64(column)})
 		}
 		if err != nil {
 			return nil, err

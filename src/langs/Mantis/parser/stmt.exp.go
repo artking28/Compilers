@@ -177,7 +177,7 @@ func (parser *MantisParser) ParseExpression() (stdParser.IExp, string, error) {
 				} else {
 					if expList != nil && expList.Values() > 1 {
 						e := (expList).(*MantisExp)
-						e.All = append((expList).(MantisExp).All, NewMantisVExp(int(h0.Value[0]), h0.Pos, expKind, parser))
+						e.All = append((expList).(*MantisExp).All, NewMantisVExp(int(h0.Value[0]), h0.Pos, expKind, parser))
 					} else if expList != nil && expList.Values() == 1 {
 						n, err := expList.Resolve()
 						if err != nil {

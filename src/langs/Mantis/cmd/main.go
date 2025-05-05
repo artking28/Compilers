@@ -14,7 +14,7 @@ func main() {
 	cmd := CliCommand{
 		Program:    "mantis",
 		Method:     Build,
-		TargetFile: "../examples/example.mnts",
+		TargetFile: "../examples/example1.mnts",
 		Subset:     lexer.SUBSET_0,
 	}
 
