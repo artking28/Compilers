@@ -179,7 +179,9 @@ func (parser *MantisParser) ParseScope(scopeType utils.ScopeType) (ret stdParser
 			if scopeType == utils.RootScope {
 				return ret, utils.GetUnexpectedIfStatementInRoot(parser.Filename, tk.Pos)
 			}
-			err = errors.Join(err, parser.ParseIfStatement())
+			fc, e := parser.ParseIfStatement()
+			err = errors.Join(e)
+			ret.Body.Statements = append(ret.Body.Statements, fc)
 			break
 
 		// Parses a for loop statement
