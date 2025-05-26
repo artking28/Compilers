@@ -3,7 +3,6 @@ package main
 import (
 	"compilers/parser"
 	"fmt"
-	mgu "github.com/artking28/myGoUtils"
 )
 
 func main() {
@@ -26,5 +25,5 @@ func main() {
 		panic(err.Error())
 	}
 
-	fmt.Println(mgu.String(out))
+	fmt.Println(out)
 }
