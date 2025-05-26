@@ -25,5 +25,6 @@ func main() {
 		panic(err.Error())
 	}
 
+	fmt.Println("A build n pode ser completa pois o CEAZER n foi implementado, mas o lexer e o parser estão prontos ")
 	fmt.Println(out)
 }
