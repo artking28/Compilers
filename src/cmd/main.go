@@ -7,12 +7,12 @@ import (
 
 func main() {
 
-	//cmd := ParseInput()
-	cmd := CliCommand{
-		Program:    "mantis",
-		Method:     Build,
-		TargetFile: "../example.mnts",
-	}
+	cmd := ParseInput()
+	//cmd := CliCommand{
+	//	Program:    "mantis",
+	//	Method:     Build,
+	//	TargetFile: "../example.mnts",
+	//}
 
 	file := cmd.TargetFile
 	p, err := parser.NewMantisParser(file, "")
