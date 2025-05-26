@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"compilers/langs/Mantis/lexer"
+	models "compilers/sharedModels"
 	"compilers/utils"
 )
 
@@ -21,7 +21,7 @@ func NewCommentStmt(content string, pos utils.Pos, parser *MantisParser) *Commen
 	}
 }
 
-func (this CommentStmt) WriteMemASM() ([]uint16, error) {
+func (this CommentStmt) WriteMemASM() (string, error) {
 	//TODO implement me
 	panic("implement me | CommentStmt@WriteMemASM")
 }
@@ -32,11 +32,11 @@ func (parser *MantisParser) ParseComment() (*CommentStmt, error) {
 	if h0 == nil {
 		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
-	if h0.Kind != lexer.COMMENT_LINE {
+	if h0.Kind != models.COMMENT_LINE {
 		return nil, utils.GetUnexpectedTokenErr(parser.Filename, string(h0.Value), h0.Pos)
 	}
 	parser.Consume(1)
-	for here := parser.Get(0); here != nil && here.Kind != lexer.BREAK_LINE; here = parser.Get(0) {
+	for here := parser.Get(0); here != nil && here.Kind != models.BREAK_LINE; here = parser.Get(0) {
 		comment += string(here.Value)
 		parser.Consume(1)
 	}

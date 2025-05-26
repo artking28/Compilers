@@ -63,3 +63,4 @@ nb-configuration.xml
 .history/*
 *.launch
 .c9/
+/bin/

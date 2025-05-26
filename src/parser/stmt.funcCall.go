@@ -1,8 +1,7 @@
 package parser
 
 import (
-	"compilers/langs/Mantis/lexer"
-	"compilers/stdParser"
+	models "compilers/sharedModels"
 	"compilers/utils"
 )
 
@@ -12,7 +11,7 @@ type FuncCall struct {
 	MantisStmtBase
 }
 
-func (this FuncCall) WriteMemASM() ([]uint16, error) {
+func (this FuncCall) WriteMemASM() (string, error) {
 	//TODO implement me
 	panic("implement me | FuncCall@WriteMemASM")
 }
@@ -33,10 +32,11 @@ func (parser *MantisParser) ParseFuncCall(from uint64) (ret *FuncCall, err error
 	if nameTk == nil {
 		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
-	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.SPACE, lexer.L_PAREN); err != nil {
+	parser.Consume(1)
+	if _, err = parser.HasNextConsume(NoSpaceMode, models.SPACE, models.L_PAREN); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "left parenthesis", err.Error(), nameTk.Pos)
 	}
-	if _, err = parser.HasNextConsume(stdParser.NoSpaceMode, lexer.SPACE, lexer.R_PAREN); err != nil {
+	if _, err = parser.HasNextConsume(NoSpaceMode, models.SPACE, models.R_PAREN); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "right parenthesis", err.Error(), nameTk.Pos)
 	}
 	return NewFuncCall(string(nameTk.Value), from, nameTk.Pos, parser), nil

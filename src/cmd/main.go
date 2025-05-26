@@ -1,9 +1,7 @@
 package main
 
 import (
-	"compilers/langs/Mantis/lexer"
-	"compilers/langs/Mantis/parser"
-	"compilers/utils"
+	"compilers/parser"
 	"fmt"
 	mgu "github.com/artking28/myGoUtils"
 )
@@ -14,17 +12,16 @@ func main() {
 	cmd := CliCommand{
 		Program:    "mantis",
 		Method:     Build,
-		TargetFile: "../examples/example1.mnts",
-		Subset:     lexer.SUBSET_0,
+		TargetFile: "../example.mnts",
 	}
 
 	file := cmd.TargetFile
-	p, err := parser.NewMantisParser(file, "", 0)
+	p, err := parser.NewMantisParser(file, "")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	out, err := p.ParseScope(utils.RootScope)
+	out, err := p.ParseScope(parser.RootScope)
 	if err != nil {
 		panic(err.Error())
 	}

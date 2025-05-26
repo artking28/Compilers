@@ -32,7 +32,7 @@ const (
 	ConsecutiveOperatorsErrCode
 	ConsecutiveValuesErrCode
 	MismatchedTypesErrCode
-	UnkownVariableErrCode
+	unknownVariableErrCode
 
 	NilPointerExceptionErrLabel              ErrLabel = "error.nil.pointer"
 	FileNotFoundErrLabel                     ErrLabel = "error.file.not.found"
@@ -47,7 +47,7 @@ const (
 	ConsecutiveOperatorsErrLabel             ErrLabel = "error.consecutive.operators"
 	ConsecutiveValuesErrLabel                ErrLabel = "error.consecutive.values"
 	MismatchedTypesErrLabel                  ErrLabel = "error.mismatch.type.values"
-	UnkownVariableErrLabel                   ErrLabel = "error.mismatch.variable"
+	unknownVariableErrLabel                  ErrLabel = "error.mismatch.variable"
 )
 
 func GetNilPointerExceptionErr() Err {
@@ -130,10 +130,10 @@ func GetUnexpectedTokenErr(filename string, word string, pos Pos) Err {
 	}
 }
 
-func GetUnkownVariableErr(filename string, varName string, pos Pos) Err {
+func GetunknownVariableErr(filename string, varName string, pos Pos) Err {
 	return Err{
-		Code:  UnkownVariableErrCode,
-		Label: UnkownVariableErrLabel,
+		Code:  unknownVariableErrCode,
+		Label: unknownVariableErrLabel,
 		Msg:   fmt.Sprintf("Unexpected variable '%s' in the file '%s' at line %d, column %d.", varName, filename, pos.Line, pos.Column),
 	}
 }

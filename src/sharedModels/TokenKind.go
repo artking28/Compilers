@@ -1,26 +1,13 @@
-package lexer
+package models
 
 import (
 	"fmt"
 )
 
-type (
-	MantisTokenKind int
-)
+type TokenKind int
 
 const (
-	SUBSET_0   = 0
-	SUBSET_1   = 1
-	SUBSET_MAX = SUBSET_1
-)
-
-var Subsets = map[int]bool{
-	SUBSET_0: true,
-	SUBSET_1: true,
-}
-
-const (
-	EOF MantisTokenKind = (iota+1)*100 + SUBSET_0
+	EOF TokenKind = iota
 	UNKNOW
 	BREAK_LINE
 	TAB
@@ -51,7 +38,9 @@ const (
 	GREATER_EQUAL_THEN
 	SHIFT_RIGHT
 	ASSIGN_SHIFT_RIGHT
+	MUL
 	MOD
+	DIV
 	ASSIGN_MOD
 	ADD
 	ASSIGN_ADD
@@ -71,19 +60,16 @@ const (
 	KEY_IF
 	KEY_ELSE
 	KEY_VAR
-	KEY_RETURN = (iota+1)*100 + SUBSET_1
-	KEY_MATCH
-	KEY_WHEN
-	KEY_REPEAT
-	KEY_IN
-	MUL
+	KEY_BREAK
 	ASSIGN_MUL
 )
 
-func (this *MantisTokenKind) String() (s string) {
+func (this *TokenKind) String() (s string) {
 	switch *this {
 	case EOF:
 		return "EOF"
+	case UNKNOW:
+		return "UNKNOW"
 	case BREAK_LINE:
 		return "BREAK_LINE"
 	case TAB:
@@ -122,6 +108,8 @@ func (this *MantisTokenKind) String() (s string) {
 		return "R_BRACE"
 	case INIT:
 		return "INIT"
+	case ASSIGN:
+		return "ASSIGN"
 	case EQUAL:
 		return "EQUAL"
 	case LOWER_THEN:
@@ -130,16 +118,22 @@ func (this *MantisTokenKind) String() (s string) {
 		return "LOWER_EQUAL_THEN"
 	case SHIFT_LEFT:
 		return "SHIFT_LEFT"
+	case ASSIGN_SHIFT_LEFT:
+		return "ASSIGN_SHIFT_LEFT"
 	case GREATER_THEN:
 		return "GREATER_THEN"
 	case GREATER_EQUAL_THEN:
 		return "GREATER_EQUAL_THEN"
 	case SHIFT_RIGHT:
 		return "SHIFT_RIGHT"
-	case ASSIGN:
-		return "ASSIGN"
+	case ASSIGN_SHIFT_RIGHT:
+		return "ASSIGN_SHIFT_RIGHT"
+	case MUL:
+		return "MUL"
 	case MOD:
 		return "MOD"
+	case DIV:
+		return "DIV"
 	case ASSIGN_MOD:
 		return "ASSIGN_MOD"
 	case ADD:
@@ -152,14 +146,20 @@ func (this *MantisTokenKind) String() (s string) {
 		return "ASSIGN_SUB"
 	case AND_BIT:
 		return "AND_BIT"
+	case ASSIGN_AND_BIT:
+		return "ASSIGN_AND_BIT"
 	case AND_BOOL:
 		return "AND_BOOL"
 	case XOR_BIT:
 		return "XOR_BIT"
+	case ASSIGN_XOR_BIT:
+		return "ASSIGN_XOR_BIT"
 	case XOR_BOOL:
 		return "XOR_BOOL"
 	case OR_BIT:
 		return "OR_BIT"
+	case ASSIGN_OR_BIT:
+		return "ASSIGN_OR_BIT"
 	case OR_BOOL:
 		return "OR_BOOL"
 	case KEY_FUN:
@@ -172,18 +172,8 @@ func (this *MantisTokenKind) String() (s string) {
 		return "KEY_ELSE"
 	case KEY_VAR:
 		return "KEY_VAR"
-	case KEY_RETURN:
-		return "KEY_RETURN"
-	case KEY_MATCH:
-		return "KEY_MATCH"
-	case KEY_WHEN:
-		return "KEY_WHEN"
-	case KEY_REPEAT:
-		return "KEY_REPEAT"
-	case KEY_IN:
-		return "KEY_IN"
-	case MUL:
-		return "MUL"
+	case KEY_BREAK:
+		return "KEY_BREAK"
 	case ASSIGN_MUL:
 		return "ASSIGN_MUL"
 	default:
@@ -192,7 +182,26 @@ func (this *MantisTokenKind) String() (s string) {
 	return s
 }
 
-func CombineTokens(tk0, tk1 MantisToken) (MantisTokenKind, []rune) {
+func (this TokenKind) Weight() uint8 {
+	switch this {
+	case MUL, MOD, DIV:
+		return 254
+	case ADD, SUB:
+		return 253
+	case SHIFT_LEFT, SHIFT_RIGHT:
+		return 252
+	case AND_BIT:
+		return 251
+	case OR_BIT:
+		return 250
+	case UNKNOW:
+		return 1
+	default:
+		return 0
+	}
+}
+
+func CombineTokens(tk0, tk1 Token) (TokenKind, []rune) {
 
 	if tk0.Kind == COLON && tk1.Kind == ASSIGN {
 		return INIT, []rune(":=")

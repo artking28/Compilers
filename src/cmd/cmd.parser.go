@@ -1,10 +1,9 @@
 package main
 
 import (
-	"compilers/langs/Mantis/lexer"
+	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -25,6 +24,7 @@ type (
 const (
 	Run Method = iota
 	Build
+	Help
 )
 
 func ParseInput() (ret CliCommand) {
@@ -42,6 +42,18 @@ func ParseInput() (ret CliCommand) {
 		ret.Method = Build
 		ret.parseBuild()
 		break
+	case "help":
+		ret.Method = Help
+		sb := strings.Builder{}
+		sb.WriteString("\n\nMantis is a programming language created by Arthur for educational purposes.\n\n")
+		sb.WriteString("Usage:\n")
+		sb.WriteString("\tmnts <command> [arguments]\n")
+		sb.WriteString("\nThe commands are:\n")
+		sb.WriteString("\tbuild\t\tbuild a program from file. To pass the output name, use '-o <OUTPUT>', otherwise it'll use the file name as output\n")
+		//sb.WriteString("\trun: run a mantis file\n")
+		sb.WriteString("\thelp\t\tget help panel\n\n")
+		fmt.Print(sb.String())
+		os.Exit(0)
 	default:
 		log.Fatalf("error: unknown command '%s'", os.Args[1])
 	}
@@ -66,17 +78,13 @@ func (this *CliCommand) parseRun() {
 
 var flags = map[string]MantisFlag{
 	"-o": Output,
-	"-s": Subset,
 }
 
-var options = map[string]MantisFlag{
-	"--subset": Subset,
-}
+var options = map[string]MantisFlag{}
 
 const (
 	None MantisFlag = iota
 	Output
-	Subset
 )
 
 func (this *CliCommand) parseFlag() {
@@ -94,23 +102,6 @@ func (this *CliCommand) parseFlag() {
 			}
 			this.Output = list[i]
 			break
-		case Subset:
-			i++
-			if i >= len(list) {
-				log.Fatalf("error: not enough arguments, missing subset code")
-			}
-			parseInt, err := strconv.ParseInt(list[i], 0, 8)
-			if err != nil {
-				log.Fatalf("error: not valid argument, subset must be a number argument")
-			}
-			if this.Subset != 0 {
-				log.Fatalf("error: duplicate flag, subset must be unique")
-			}
-			if lexer.Subsets[int(parseInt)] == false {
-				log.Fatalf("error: invalid subset value, subset must be between 0 and %d", lexer.SUBSET_MAX)
-			}
-			this.Subset = int8(parseInt)
-			break
 		case None:
 			fallthrough
 		default:
@@ -126,22 +117,6 @@ func (this *CliCommand) parseOption(option string) {
 	}
 
 	switch options[split[0]] {
-	case Subset:
-		if split[1] == "" {
-			log.Fatalf("error: not valid argument, subset code must be a number argument")
-		}
-		parseInt, err := strconv.ParseInt(split[1], 0, 8)
-		if err != nil {
-			log.Fatalf("error: not valid argument, subset code must be a number argument")
-		}
-		if this.Subset != 0 {
-			log.Fatalf("error: duplicate flag, subset code must be unique")
-		}
-		if lexer.Subsets[int(parseInt)] == false {
-			log.Fatalf("error: invalid subset value, subset code must be between 0 and %d", lexer.SUBSET_MAX)
-		}
-		this.Subset = int8(parseInt)
-		break
 	case None:
 		fallthrough
 	default:

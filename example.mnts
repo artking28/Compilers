@@ -18,17 +18,16 @@ fun main() {
     // Two vars, two values
     alpha, romeo := 4, 1
 
-    // Put somthing on RES
     print()
 
     // Finish the program
     exit()
 
-    // for i:=0; i<10; i++ {
+    for true {
         // Do something
-    // }
+    }
 
-    // if foo < 10 {
+    if foo < 10 {
         // Do another thing
-    // }
+    }
 }

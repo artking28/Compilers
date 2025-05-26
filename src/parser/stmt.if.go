@@ -1,23 +1,22 @@
 package parser
 
 import (
-	"compilers/langs/Mantis/lexer"
-	"compilers/stdParser"
+	models "compilers/sharedModels"
 	"compilers/utils"
 )
 
 type IfStmt struct {
-	Condition stdParser.IExp
-	Body      stdParser.Scope
+	Condition IExp
+	Body      Scope
 	MantisStmtBase
 }
 
-func (this IfStmt) WriteMemASM() ([]uint16, error) {
+func (this IfStmt) WriteMemASM() (string, error) {
 	//TODO implement me
 	panic("implement me | IfStmt@WriteMemASM")
 }
 
-func NewIfStmt(condition stdParser.IExp, body stdParser.Scope, pos utils.Pos, parser *MantisParser) *IfStmt {
+func NewIfStmt(condition IExp, body Scope, pos utils.Pos, parser *MantisParser) *IfStmt {
 	return &IfStmt{
 		Condition: condition,
 		Body:      body,
@@ -35,23 +34,23 @@ func (parser *MantisParser) ParseIfStatement() (ret *IfStmt, err error) {
 	}
 	parser.Consume(1)
 
-	condition, typeOf, err := parser.ParseExpression()
+	condition, err := parser.ParseExpression(false)
 	if err != nil {
 		return nil, err
 	}
-	if typeOf != "bool" {
+	if TypeOf(condition, parser) != "bool" {
 		//TODO implement me
-		panic("implement me | MantisParser@ParseIfStatement")
+		panic("implement me | MantisParser@ParseForStatement")
 	}
 
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.L_BRACE); err != nil {
+	if _, err = parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.L_BRACE); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "left brace", err.Error(), h0.Pos)
 	}
-	ast, err := parser.ParseScope(utils.IfScope)
+	ast, err := parser.ParseScope(IfScope)
 	if err != nil {
 		return nil, err
 	}
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.R_BRACE); err != nil {
+	if _, err = parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.R_BRACE); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "right brace", err.Error(), h0.Pos)
 	}
 	return NewIfStmt(condition, ast, h0.Pos, parser), nil

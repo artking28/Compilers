@@ -1,23 +1,22 @@
 package parser
 
 import (
-	"compilers/langs/Mantis/lexer"
-	"compilers/stdParser"
+	models "compilers/sharedModels"
 	"compilers/utils"
 )
 
 type FuncStmt struct {
 	Name string
-	Body stdParser.Scope
+	Body Scope
 	MantisStmtBase
 }
 
-func (this FuncStmt) WriteMemASM() ([]uint16, error) {
+func (this FuncStmt) WriteMemASM() (string, error) {
 	//TODO implement me
 	panic("implement me | FuncStmt@WriteMemASM")
 }
 
-func NewFuncStmt(name string, body stdParser.Scope, pos utils.Pos, parser *MantisParser) *FuncStmt {
+func NewFuncStmt(name string, body Scope, pos utils.Pos, parser *MantisParser) *FuncStmt {
 	return &FuncStmt{
 		Name: name,
 		Body: body,
@@ -35,24 +34,24 @@ func (parser *MantisParser) ParseFunction() (ret *FuncStmt, err error) {
 		return nil, utils.GetUnexpectedTokenNoPosErr(parser.Filename, "EOF")
 	}
 	parser.Consume(1)
-	nameTk, _ := parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.ID)
+	nameTk, _ := parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.ID)
 	if nameTk == nil {
 		return nil, utils.GetExpectedTokenErr(parser.Filename, "function name", h0.Pos)
 	}
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.L_PAREN); err != nil {
+	if _, err = parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.L_PAREN); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "left parenthesis", err.Error(), h0.Pos)
 	}
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.R_PAREN); err != nil {
+	if _, err = parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.R_PAREN); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "right parenthesis", err.Error(), h0.Pos)
 	}
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.L_BRACE); err != nil {
+	if _, err = parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.L_BRACE); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "left brace", err.Error(), h0.Pos)
 	}
-	ast, err := parser.ParseScope(utils.FuncScope)
+	ast, err := parser.ParseScope(FuncScope)
 	if err != nil {
 		return nil, err
 	}
-	if _, err = parser.HasNextConsume(stdParser.OptionalSpaceMode, lexer.SPACE, lexer.R_BRACE); err != nil {
+	if _, err = parser.HasNextConsume(OptionalSpaceMode, models.SPACE, models.R_BRACE); err != nil {
 		return nil, utils.GetExpectedTokenErrOr(parser.Filename, "right brace", err.Error(), h0.Pos)
 	}
 	return NewFuncStmt(string(nameTk.Value), ast, h0.Pos, parser), nil
